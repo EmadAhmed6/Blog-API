@@ -26,7 +26,7 @@ const register = asyncHandler(async(req,res) => {
 })
 
 
-const
+// const
 
 module.exports = {
     register,
