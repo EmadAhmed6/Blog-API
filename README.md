@@ -36,9 +36,6 @@ MongoDB (Local or Cloud instance).
 Installation
 Clone the repository:
 
-Bash
-git clone https://github.com/[your-username]/[your-repo-name].git
-cd [your-repo-name]
 Install dependencies:
 
 Bash
