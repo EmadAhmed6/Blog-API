@@ -39,7 +39,6 @@ const userSchema = new mongoose.Schema(
     },
 }, {timestamps: true});
 
-
 userSchema.methods.generateToken = function() {
     return jwt.sign({id: this._id, isAdmin: this.isAdmin}, process.env.JWT_SECRET_KEY)
 }
@@ -52,10 +51,18 @@ const validateRegisterUser = user => {
     })
     return schema.validate(user);
 }
+const validateLoginUser = user => {
+    const schema = Joi.object({
+        email: Joi.string().email().trim().min(4).required(),
+        password: passwordComplexity().required(),
+    })
+    return schema.validate(user);
+}
 
 const User = mongoose.model('User', userSchema);
 
 module.exports = {
     User,
     validateRegisterUser,
+    validateLoginUser,
 }
