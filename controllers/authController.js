@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const { validateRegisterUser, User, validateLoginUser } = require('../models/User');
 
+// Register User
 const register = asyncHandler(async(req,res) => {
     const { error } = validateRegisterUser(req.body);
     if (error) {
@@ -25,7 +26,7 @@ const register = asyncHandler(async(req,res) => {
     return res.status(200).json({token, ...others})
 })
 
-
+// Login User
 const login = asyncHandler(async(req,res) => {
     const { error } = validateLoginUser(req.body);
     if (error) {
@@ -43,6 +44,8 @@ const login = asyncHandler(async(req,res) => {
     const {password, ...others} = user.toObject();
     return res.status(200).json({...others, token})
 })
+// Forgot Password
+
 module.exports = {
     register,
     login,
