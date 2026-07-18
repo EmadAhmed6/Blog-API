@@ -9,6 +9,8 @@ app.use(express.urlencoded({ extended: false }));
 
 connectToDB();
 app.use("/auth", require("./routers/auth"));
+app.use("/users", require("./routers/users"));
+app.use("/posts", require("./routers/posts"));
 
 app.set("view engine", "ejs");
 

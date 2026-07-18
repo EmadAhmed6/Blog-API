@@ -109,8 +109,6 @@ const sendForgotPasswodLink = asyncHandler(async (req,res) => {
     })
 })
 
-
-
 const getResetPasswordPage = asyncHandler(async (req,res) => {
   const user = await User.findById(req.params.userId);
    if (!user) {
@@ -146,7 +144,7 @@ const resetPassword = asyncHandler(async (req,res) => {
     const salt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, salt);
     user.password = req.body.password;
-    
+
     await user.save();
     res.render('success-link')
   } catch(err) {

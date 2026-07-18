@@ -68,6 +68,16 @@ const validateResetPassword = password => {
     return schema.validate(password);
 }
 
+
+const validateUpdateUser = user => {
+    const schema = Joi.object({
+        username: Joi.string().trim().min(3).max(10),
+        email: Joi.string().email().trim().min(4),
+        password: passwordComplexity(),
+    })
+    return schema.validate(user);
+}
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = {
@@ -75,4 +85,5 @@ module.exports = {
     validateRegisterUser,
     validateLoginUser,
     validateResetPassword,
+    validateUpdateUser
 }
