@@ -59,6 +59,10 @@ const validateCreatePost = (post) => {
     description: Joi.string().trim().min(10).max(250).required(),
     user: Joi.string().required(),
     category: Joi.string().required(),
+    image: Joi.object({
+      url: Joi.string().uri().required(),
+      publicId: Joi.string().allow(null).required(),
+    }).optional(),
   });
 
   return schema.validate(post);
@@ -69,6 +73,10 @@ const validateUpdatePost = (post) => {
     description: Joi.string().trim().min(10).max(250),
     user: Joi.string(),
     category: Joi.string(),
+    image: Joi.object({
+      url: Joi.string().uri(),
+      publicId: Joi.string().allow(null),
+    }),
   });
 
   return schema.validate(post);

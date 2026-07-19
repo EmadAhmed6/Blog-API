@@ -8,11 +8,13 @@ const {
   deletePost,
   createPost,
   likePost,
+  uploadPostImage,
 } = require("../controllers/postController");
 const {
   verifyAdminToken,
   verifyAuthorizedToken,
 } = require("../middlewares/verifyToken");
+const upload = require("../middlewares/multer");
 
 router.route("/").get(getAllPosts).post(verifyAuthorizedToken, createPost);
 router
@@ -24,5 +26,11 @@ router
 router.put("/:id/like", verifyAuthorizedToken, likePost);
 
 router.use("/:postId/comments", comments);
+router.post(
+  "/upload",
+  verifyAuthorizedToken,
+  upload.single("image"),
+  uploadPostImage,
+);
 
 module.exports = router;

@@ -5,6 +5,8 @@ const {
   validateCreatePost,
   validateUpdatePost,
 } = require("../models/Post");
+const path = require("path");
+const cloudinary = require("../utils/cloudinary");
 
 // get All Posts
 const getAllPosts = asyncHandler(async (req, res) => {
@@ -52,6 +54,7 @@ const createPost = asyncHandler(async (req, res) => {
     description: req.body.description,
     user: req.user.id,
     category: req.body.category,
+    image: req.body.image,
   });
   const finalPost = await newPost.save();
   return res.status(201).json(finalPost);
@@ -71,6 +74,7 @@ const updatePost = asyncHandler(async (req, res) => {
         description: req.body.description,
         user: req.body.user,
         category: req.body.category,
+        image: req.body.image,
       },
     },
     { new: true, runValidators: true },
@@ -93,6 +97,18 @@ const deletePost = asyncHandler(async (req, res) => {
   }
 });
 
+const uploadPostImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file provided" });
+  }
+
+  const result = await cloudinary.uploader.upload(req.file.path);
+  return res.status(200).json({
+    message: "Uploaded successfully",
+    url: result.secure_url,
+    publicId: result.public_id,
+  });
+});
 // Like Post
 const likePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -118,5 +134,6 @@ module.exports = {
   createPost,
   updatePost,
   deletePost,
+  uploadPostImage,
   likePost,
 };
