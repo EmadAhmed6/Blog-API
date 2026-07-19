@@ -7,17 +7,19 @@ const {
   deleteComment,
 } = require("../controllers/commentController");
 const {
+  verifyToken,
   verifyAdminToken,
   verifyAuthorizedToken,
+  verifyCommentOwner,
 } = require("../middlewares/verifyToken");
 
 router
   .route("/")
-  .get(getAllComments)
-  .post(verifyAuthorizedToken, createComment);
+  .get(verifyToken, getAllComments)
+  .post(verifyToken, createComment);
 router
   .route("/:id")
-  .put(verifyAuthorizedToken, updateComment)
-  .delete(verifyAuthorizedToken, deleteComment);
+  .put(verifyCommentOwner, updateComment)
+  .delete(verifyCommentOwner, deleteComment);
 
 module.exports = router;

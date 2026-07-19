@@ -11,26 +11,25 @@ const {
   uploadPostImage,
 } = require("../controllers/postController");
 const {
+  verifyToken,
   verifyAdminToken,
   verifyAuthorizedToken,
+  verifyPostOwner,
 } = require("../middlewares/verifyToken");
 const upload = require("../middlewares/multer");
-
-router.route("/").get(getAllPosts).post(verifyAuthorizedToken, createPost);
+// Crud
+router.route("/").get(verifyToken, getAllPosts).post(verifyToken, createPost);
 router
   .route("/:id")
-  .get(verifyAuthorizedToken, getPostById)
-  .put(verifyAuthorizedToken, updatePost)
-  .delete(verifyAuthorizedToken, deletePost);
+  .get(verifyToken, getPostById)
+  .put(verifyPostOwner, updatePost)
+  .delete(verifyPostOwner, deletePost);
 
-router.put("/:id/like", verifyAuthorizedToken, likePost);
+router.put("/:id/like", verifyToken, likePost);
 
-router.use("/:postId/comments", comments);
-router.post(
-  "/upload",
-  verifyAuthorizedToken,
-  upload.single("image"),
-  uploadPostImage,
-);
+// Upload Image
+router.post("/upload", verifyToken, upload.single("image"), uploadPostImage);
+
+router.use("/:postId/comments", verifyToken, comments);
 
 module.exports = router;
