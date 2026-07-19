@@ -54,7 +54,11 @@ const verifyPostOwner = (req, res, next) => {
 };
 const verifyCommentOwner = (req, res, next) => {
   verifyToken(req, res, async () => {
-    const comment = await Comment.findById(req.params.id);
+    const commentId = req.params.commentId;
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment was not found" });
+    }
     if (comment.user.toString() === req.user.id || req.user.isAdmin) {
       next();
     } else {
@@ -62,6 +66,7 @@ const verifyCommentOwner = (req, res, next) => {
     }
   });
 };
+
 module.exports = {
   verifyToken,
   verifyAuthorizedToken,

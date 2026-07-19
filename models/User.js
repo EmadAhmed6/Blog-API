@@ -24,6 +24,13 @@ const userSchema = new mongoose.Schema(
       required: true,
       minLength: 6,
     },
+    profilePicture: {
+      type: Object,
+      default: {
+        url: "",
+        publicId: null,
+      },
+    },
     isAdmin: {
       type: Boolean,
       default: false,
@@ -77,6 +84,10 @@ const validateUpdateUser = (user) => {
     username: Joi.string().trim().min(3).max(10),
     email: Joi.string().email().trim().min(4),
     password: passwordComplexity(),
+    image: Joi.object({
+      url: Joi.string().uri(),
+      publicId: Joi.string().allow(null),
+    }).optional(),
   });
   return schema.validate(user);
 };

@@ -103,12 +103,14 @@ const uploadPostImage = asyncHandler(async (req, res) => {
   }
 
   const result = await cloudinary.uploader.upload(req.file.path);
+  fs.unlinkSync(req.file.path);
   return res.status(200).json({
     message: "Uploaded successfully",
     url: result.secure_url,
     publicId: result.public_id,
   });
 });
+
 // Like Post
 const likePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
