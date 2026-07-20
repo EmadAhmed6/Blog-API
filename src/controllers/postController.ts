@@ -13,7 +13,7 @@ import { Types } from "mongoose";
 // get All Posts
 const getAllPosts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const pageNumber = Number(req.query.pageNumber);
+    const pageNumber = Number(req.query.pageNumber) || 1;
     const postsPerPage = 2;
     const posts = await Post.find()
       .populate("user", ["_id", "username"])
@@ -149,7 +149,7 @@ const likePost = asyncHandler(
     }
     const post = await Post.findById(id);
     if (!post) {
-      res.status(404).json({ message: "Post not found" });
+      res.status(404).json({ message: "Post was not found" });
       return;
     }
 

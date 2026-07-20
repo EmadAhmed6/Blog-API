@@ -1,0 +1,354 @@
+// GET    /posts
+// POST   /posts
+// GET    /posts/{id}
+// PUT    /posts/{id}
+// DELETE /posts/{id}
+// PUT    /posts/{id}/like
+// POST   /posts/upload
+
+/**
+ * @swagger
+ * tags:
+ *   name: Posts
+ *   description: Blog posts management APIs
+ */
+
+/**
+ * @swagger
+ * /posts:
+ *   get:
+ *     summary: Get all posts
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: pageNumber
+ *         required: true
+ *         description: Page number
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: List of posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
+ *       401:
+ *         description: Not authorized
+ */
+
+/**
+ * @swagger
+ * /posts:
+ *   post:
+ *     summary: Create a new post
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - category
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 32
+ *                 example: My First Blog Post
+ *               description:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 250
+ *                 example: This is my first blog post description.
+ *               category:
+ *                 type: string
+ *                 example: Technology
+ *               image:
+ *                 type: object
+ *                 properties:
+ *                   url:
+ *                     type: string
+ *                     format: uri
+ *                     example: https://example.com/image.jpg
+ *                   publicId:
+ *                     type: string
+ *                     nullable: true
+ *                     example: blog_image_123
+ *     responses:
+ *       201:
+ *         description: Post created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Not authorized
+ */
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   get:
+ *     summary: Get post by ID
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *     responses:
+ *       200:
+ *         description: Post found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Post not found
+ */
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   put:
+ *     summary: Update post
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 32
+ *                 example: Updated Blog Post
+ *               description:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 250
+ *                 example: Updated description for the blog post.
+ *               category:
+ *                 type: string
+ *                 example: Programming
+ *               image:
+ *                 type: object
+ *                 properties:
+ *                   url:
+ *                     type: string
+ *                     format: uri
+ *                   publicId:
+ *                     type: string
+ *                     nullable: true
+ *     responses:
+ *       200:
+ *         description: Post updated successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Post was not found
+ */
+
+/**
+ * @swagger
+ * /posts/{id}:
+ *   delete:
+ *     summary: Delete post
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *     responses:
+ *       200:
+ *         description: Post deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Post has been deleted successfully
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Post was not found
+ */
+
+/**
+ * @swagger
+ * /posts/{id}/like:
+ *   put:
+ *     summary: Like or unlike a post
+ *     description: Toggle the current user's like on a post
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Post ID
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *     responses:
+ *       200:
+ *         description: Post like status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *       401:
+ *         description: You are not logged in
+ *       404:
+ *         description: Post was not found
+ */
+
+/**
+ * @swagger
+ * /posts/upload:
+ *   post:
+ *     summary: Upload post image
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Image uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Uploaded successfully
+ *                 url:
+ *                   type: string
+ *                   format: uri
+ *                 publicId:
+ *                   type: string
+ *       400:
+ *         description: No file provided
+ *       401:
+ *         description: Not authorized
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Post:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *         title:
+ *           type: string
+ *           example: My First Blog Post
+ *         description:
+ *           type: string
+ *           example: This is my first blog post description.
+ *         category:
+ *           type: string
+ *           example: Technology
+ *         user:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             username:
+ *               type: string
+ *               example: Ahmed
+ *         image:
+ *           type: object
+ *           properties:
+ *             url:
+ *               type: string
+ *               format: uri
+ *             publicId:
+ *               type: string
+ *               nullable: true
+ *         likes:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *         comments:
+ *           type: array
+ *           items:
+ *             type: object
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */

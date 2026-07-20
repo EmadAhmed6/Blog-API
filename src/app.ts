@@ -2,20 +2,20 @@ import express from "express";
 import connectToDB from "./config/db.js";
 import { notFound, errorHandler } from "./middlewares/errors.js";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
 import auth from "./routers/auth.js";
 import users from "./routers/users.js";
 import posts from "./routers/posts.js";
 import helmet from "helmet";
-import cors from "cors"
+import cors from "cors";
+import swaggerui from "swagger-ui-express";
+import spacs from "./config/swagger.js";
 dotenv.config();
 const app = express();
 
 connectToDB();
 
 app.use(helmet());
-app.use(cors({origin: 'http://localhost:3000'}))
+app.use(cors({ origin: "http://localhost:3000" }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -24,6 +24,7 @@ app.use("/auth", auth);
 app.use("/users", users);
 app.use("/posts", posts);
 
+app.use("/api-docs", swaggerui.serve, swaggerui.setup(spacs));
 
 app.use(notFound);
 app.use(errorHandler);
