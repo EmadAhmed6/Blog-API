@@ -36,7 +36,7 @@ const getAllPosts = asyncHandler(
 // Get Post By Id
 const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const posts = await Post.findById(req.params.id)
+    const posts = await Post.findById(req.params.postId)
       .populate("user", ["_id", "username"])
       .populate("likes", ["_id", "username"])
       .populate({
@@ -86,7 +86,7 @@ const updatePost = asyncHandler(
       return;
     }
     const updatedPost = await Post.findByIdAndUpdate(
-      req.params.id,
+      req.params.postId,
       {
         $set: {
           title: req.body.title,
@@ -110,9 +110,9 @@ const updatePost = asyncHandler(
 // Delete Post
 const deletePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.postId);
     if (post) {
-      await Post.findByIdAndDelete(req.params.id);
+      await Post.findByIdAndDelete(req.params.postId);
       res.status(200).json({ message: "Post has been deleted successfully" });
     } else {
       res.status(404).json({ message: "Post was not found" });

@@ -1,9 +1,9 @@
 // GET    /posts
 // POST   /posts
-// GET    /posts/{id}
-// PUT    /posts/{id}
-// DELETE /posts/{id}
-// PUT    /posts/{id}/like
+// GET    /posts/{postId}
+// PUT    /posts/{postId}
+// DELETE /posts/{postId}
+// PUT    /posts/{postId}/like
 // POST   /posts/upload
 
 /**
@@ -103,7 +103,7 @@
 
 /**
  * @swagger
- * /posts/{id}:
+ * /posts/{postId}:
  *   get:
  *     summary: Get post by ID
  *     tags:
@@ -112,7 +112,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: postId
  *         required: true
  *         description: Post ID
  *         schema:
@@ -133,7 +133,7 @@
 
 /**
  * @swagger
- * /posts/{id}:
+ * /posts/{postId}:
  *   put:
  *     summary: Update post
  *     tags:
@@ -142,7 +142,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: postId
  *         required: true
  *         description: Post ID
  *         schema:
@@ -190,7 +190,7 @@
 
 /**
  * @swagger
- * /posts/{id}:
+ * /posts/{postId}:
  *   delete:
  *     summary: Delete post
  *     tags:
@@ -199,7 +199,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: postId
  *         required: true
  *         description: Post ID
  *         schema:
@@ -224,7 +224,7 @@
 
 /**
  * @swagger
- * /posts/{id}/like:
+ * /posts/{postId}/like:
  *   put:
  *     summary: Like or unlike a post
  *     description: Toggle the current user's like on a post
@@ -234,7 +234,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: postId
  *         required: true
  *         description: Post ID
  *         schema:

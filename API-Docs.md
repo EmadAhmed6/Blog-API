@@ -40,10 +40,10 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 9 | DELETE | `/users/:id` | Delete user account from the database | 🔒 |
 | 10 | GET | `/posts` | Retrieve all blog posts with paginated comments | 🔒 |
 | 11 | POST | `/posts` | Create a new blog post with metadata | 🔒 |
-| 12 | GET | `/posts/:id` | Retrieve detailed view of a single post by ID | 🔒 |
-| 13 | PUT | `/posts/:id` | Update title, description, category, or image of a post | 🔒 |
-| 14 | DELETE | `/posts/:id` | Delete a post and clear its associated media | 🔒 |
-| 15 | PUT | `/posts/:id/like` | Toggle like/unlike status on a blog post | 🔒 |
+| 12 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 |
+| 13 | PUT | `/posts/:postId` | Update title, description, category, or image of a post | 🔒 |
+| 14 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 |
+| 15 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 |
 | 16 | POST | `/posts/upload` | Upload thumbnail/cover image to Cloudinary | 🔒 |
 | 17 | GET | `/posts/:postId/comments` | Retrieve list of comments for a specific post | 🔒 |
 | 18 | POST | `/posts/:postId/comments` | Post a new comment under a specific post | 🔒 |
@@ -136,7 +136,7 @@ Login successful. Returns user account details and the authorization token.
 ```
 
 ##### Response 400
-Invalid email/password, or Joi schema validation failed.
+Invalid email/password, or Zod validation failed.
 ```json
 {
   "message": "Invalid email or password"
@@ -332,10 +332,10 @@ Profile updated successfully. Returns updated user document.
 ```
 
 ##### Response 400
-Joi schema input validation failure.
+Zod schema input validation failure.
 ```json
 {
-  "message": "\"username\" length must be at least 3 characters long"
+  "message": "String must contain at least 3 character(s)"
 }
 ```
 
@@ -567,7 +567,7 @@ Post created successfully. Returns the populated post resource.
 Validation failure (e.g. description is too short).
 ```json
 {
-  "message": "\"description\" length must be at least 10 characters long"
+  "message": "String must contain at least 10 character(s)"
 }
 ```
 
@@ -581,13 +581,13 @@ Not authorized.
 
 ---
 
-### GET /posts/:id 🔒
+### GET /posts/:postId 🔒
 Retrieve a single post details with all associated populated child structures.
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | MongoDB ObjectId of the blog post. |
+| `postId` | string | ✅ | MongoDB ObjectId of the blog post. |
 
 #### Responses
 
@@ -632,13 +632,13 @@ Post was not found in the database.
 
 ---
 
-### PUT /posts/:id 🔒
+### PUT /posts/:postId 🔒
 Update post parameters. Access is allowed only to the post author owner or Admins.
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | Post database record ID. |
+| `postId` | string | ✅ | Post database record ID. |
 
 #### Request Body
 | Field | Type | Required | Description |
@@ -670,7 +670,7 @@ Post updated successfully. Returns updated post document.
 ```
 
 ##### Response 400
-Joi payload validation error.
+Zod payload validation error.
 ```json
 {
   "message": "Invalid input"
@@ -703,13 +703,13 @@ Post was not found.
 
 ---
 
-### DELETE /posts/:id 🔒
+### DELETE /posts/:postId 🔒
 Delete a blog post and remove its media assets. Restricted to the post owner or Admins.
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | Database record ID of the post. |
+| `postId` | string | ✅ | Database record ID of the post. |
 
 #### Responses
 
@@ -747,13 +747,13 @@ Post target was not found in the database.
 
 ---
 
-### PUT /posts/:id/like 🔒
+### PUT /posts/:postId/like 🔒
 Toggle a user's like/unlike status on a specific post.
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
 | :--- | :--- | :---: | :--- |
-| `id` | string | ✅ | The blog post ID. |
+| `postId` | string | ✅ | The blog post ID. |
 
 #### Responses
 
@@ -1197,7 +1197,7 @@ Comment was not found.
 | :--- | :--- | :--- |
 | `200` | OK | The request succeeded, and the payload is returned in the response. |
 | `201` | Created | The resource (post/comment) was successfully created. |
-| `400` | Bad Request | The request parameters are invalid or missing, or fail Joi validation rules. |
+| `400` | Bad Request | The request parameters are invalid or missing, or fail Zod validation rules. |
 | `401` | Unauthorized | The request lacks a valid JWT token in the Authorization header. |
 | `403` | Forbidden | The authenticated user lacks the required ownership permissions or Admin flag. |
 | `404` | Not Found | The requested route, user, post, or comment could not be found. |

@@ -21,7 +21,7 @@ const router = express.Router();
 // Crud
 router.route("/").get(verifyToken, getAllPosts).post(verifyToken, createPost);
 router
-  .route("/:id")
+  .route("/:postId")
   .get(verifyToken, getPostById)
   .put(verifyPostOwner, updatePost)
   .delete(verifyPostOwner, deletePost);

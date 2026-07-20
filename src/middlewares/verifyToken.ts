@@ -75,7 +75,7 @@ const verifyPostOwner = (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.postId);
     if (!post) {
       return res.status(404).json({ message: "Post was not found" });
     }
