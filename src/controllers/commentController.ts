@@ -41,14 +41,14 @@ const createComment = asyncHandler(
       return;
     }
 
-    const { error } = validateCreateComment({
+    const { error, success } = validateCreateComment({
       postId: postId,
       text: req.body.text,
     } as any);
-    if (error) {
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
 
@@ -73,11 +73,11 @@ const createComment = asyncHandler(
 // Update Comment
 const updateComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { error } = validateUpdateComment(req.body);
-    if (error) {
+    const { error, success } = validateUpdateComment(req.body);
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
     const commentId = req.params.commentId;
@@ -104,7 +104,7 @@ const updateComment = asyncHandler(
 // Delete Comment
 const deleteComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const commentId = req.params.id;
+    const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
       res.status(400).json({ message: "Comment ID is required" });
       return;

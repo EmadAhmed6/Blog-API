@@ -26,13 +26,14 @@ const getUserById = asyncHandler(
 // UPDATE USER
 const updateUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { error } = validateUpdateUser(req.body);
-    if (error) {
+    const { success, error } = validateUpdateUser(req.body);
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
+
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       req.body.password = await bcrypt.hash(req.body.password, salt);

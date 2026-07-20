@@ -8,16 +8,17 @@ import {
   User,
   validateLoginUser,
   validateResetPassword,
+  validateForgotPassword,
 } from "../models/User.js";
 
 // Register User
 const register = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { error } = validateRegisterUser(req.body);
-    if (error) {
+    const { error, success } = validateRegisterUser(req.body);
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
     const user = await User.findOne({ email: req.body.email });
@@ -42,11 +43,11 @@ const register = asyncHandler(
 // Login User
 const login = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { error } = validateLoginUser(req.body);
-    if (error) {
+    const { error, success } = validateLoginUser(req.body);
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
     const user = await User.findOne({ email: req.body.email });
@@ -72,6 +73,11 @@ const login = asyncHandler(
 // Send Forgot Password Link
 const sendForgotPasswodLink = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
+    const { error, success } = validateForgotPassword(req.body);
+    if (!success) {
+      res.status(400).json({ message: error.issues[0]?.message });
+      return;
+    }
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
@@ -106,7 +112,9 @@ const sendForgotPasswodLink = asyncHandler(
         return res.status(500).json({ message: "Something went wrong" });
       } else {
         console.log(`Email Sent: ${success.response}`);
-        return res.status(200).json({message: "Password reset link sent successfully to your email"})
+        return res.status(200).json({
+          message: "Password reset link sent successfully to your email",
+        });
       }
     });
   },
@@ -114,11 +122,11 @@ const sendForgotPasswodLink = asyncHandler(
 
 const resetPassword = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { error } = validateResetPassword(req.body);
-    if (error) {
+    const { error, success } = validateResetPassword(req.body);
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
     const user = await User.findById(req.params.userId);
@@ -144,9 +152,4 @@ const resetPassword = asyncHandler(
   },
 );
 
-export {
-  register,
-  login,
-  sendForgotPasswodLink,
-  resetPassword,
-};
+export { register, login, sendForgotPasswodLink, resetPassword };

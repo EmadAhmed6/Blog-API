@@ -1,14 +1,19 @@
 import express from "express";
 import mongoose, { Document, model, Schema, Types } from "mongoose";
-import Joi from "joi";
-interface IComment extends Document {
-  postId: Types.ObjectId;
-  user: Types.ObjectId;
+import { CreateCommentSchema, UpdateCommentSchema, type IUpdateComment } from "../schemas/comment.js";
+
+interface ICreateComment {
+  postId: string;
   text: string;
-  image: {
+  image?: {
     url: string;
     publicId: string | null;
   };
+}
+
+interface IComment extends Omit<ICreateComment, "postId">, Document {
+  postId: Types.ObjectId;
+  user: Types.ObjectId;
   likes: Types.ObjectId[];
 }
 const CommentSchema = new Schema<IComment>(
@@ -47,27 +52,12 @@ const CommentSchema = new Schema<IComment>(
   },
   { timestamps: true },
 );
-const validateCreateComment = (comment: IComment) => {
-  const schema = Joi.object({
-    postId: Joi.string().required(),
-    text: Joi.string().trim().required(),
-    image: Joi.object({
-      url: Joi.string().uri().required(),
-      publicId: Joi.string().allow(null).required(),
-    }).optional(),
-  });
 
-  return schema.validate(comment);
+const validateCreateComment = (comment: ICreateComment) => {
+  return CreateCommentSchema.safeParse(comment);
 };
-const validateUpdateComment = (comment: Partial<IComment>) => {
-  const schema = Joi.object({
-    text: Joi.string().trim(),
-    image: Joi.object({
-      url: Joi.string().uri(),
-      publicId: Joi.string().allow(null),
-    }).optional(),
-  });
-  return schema.validate(comment);
+const validateUpdateComment = (comment: IUpdateComment) => {
+  return UpdateCommentSchema.safeParse(comment);
 };
 
 const Comment = model<IComment>("Comment", CommentSchema);

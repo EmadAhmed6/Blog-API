@@ -54,11 +54,11 @@ const getPostById = asyncHandler(
 // Create Post
 const createPost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { error } = validateCreatePost(req.body);
-    if (error) {
+    const { error, success } = validateCreatePost(req.body);
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
     const newPost = new Post({
@@ -78,11 +78,11 @@ const createPost = asyncHandler(
 // Update Post
 const updatePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { error } = validateUpdatePost(req.body);
-    if (error) {
+    const { error, success } = validateUpdatePost(req.body);
+    if (!success) {
       res
         .status(400)
-        .json({ message: error.details[0]?.message || "Invalid Input" });
+        .json({ message: error.issues[0]?.message || "Invalid Input" });
       return;
     }
     const updatedPost = await Post.findByIdAndUpdate(
@@ -141,13 +141,13 @@ const uploadPostImage = asyncHandler(
 // Like Post
 const likePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
+    const postId = req.params.postId;
     const userId = req.user?.id;
     if (!userId) {
       res.status(401).json({ message: "You are not logged in" });
       return;
     }
-    const post = await Post.findById(id);
+    const post = await Post.findById(postId);
     if (!post) {
       res.status(404).json({ message: "Post was not found" });
       return;
@@ -156,7 +156,7 @@ const likePost = asyncHandler(
     const isLiked = post.likes.some((like) => like.toString() === userId);
     const userObjectId = new Types.ObjectId(userId);
     const updatedPost = await Post.findByIdAndUpdate(
-      id,
+      postId,
       isLiked
         ? { $pull: { likes: userObjectId } as any }
         : { $push: { likes: userObjectId } as any },

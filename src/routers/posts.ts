@@ -26,7 +26,7 @@ router
   .put(verifyPostOwner, updatePost)
   .delete(verifyPostOwner, deletePost);
 
-router.put("/:id/like", verifyToken, likePost);
+router.put("/:postId/like", verifyToken, likePost);
 
 // Upload Image
 router.post("/upload", verifyToken, upload.single("image"), uploadPostImage);

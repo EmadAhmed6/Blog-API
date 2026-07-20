@@ -1,17 +1,20 @@
-import Joi from "joi";
+import { z } from "zod";
 import jwt from "jsonwebtoken";
 import mongoose, { Document, Schema, model } from "mongoose";
+import {
+  ForgotPasswordSchema,
+  LoginSchema,
+  passwordSchema,
+  RegisterSchema,
+  ResetPasswordSchema,
+  type ILoginUser,
+  type IRegisterUser,
+  type IResetPassword,
+} from "../schemas/auth.js";
+import { UpdateUserSchema } from "../schemas/user.js";
 interface UserBase {
   username: string;
   email: string;
-}
-interface RegisterUser extends UserBase {
-  password: string;
-}
-
-interface LoginUser {
-  email: string;
-  passsword: string;
 }
 
 interface IUser extends Document, UserBase {
@@ -23,15 +26,7 @@ interface IUser extends Document, UserBase {
   };
   generateToken: () => string;
 }
-const passwordComplexity = (value?: string) =>
-  Joi.string()
-    .min(6)
-    .max(72)
-    .pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .messages({
-      "string.pattern.base":
-        "Password must include uppercase, lowercase, and numbers",
-    });
+
 const userSchema = new Schema<IUser>(
   {
     username: {
@@ -82,50 +77,22 @@ userSchema.methods.generateToken = function (this: IUser): string {
   );
 };
 
-const validateRegisterUser = (user: RegisterUser) => {
-  const schema = Joi.object({
-    username: Joi.string().min(3).max(10).required(),
-    email: Joi.string().email().trim().min(4).required(),
-    password: passwordComplexity().required(),
-  });
-  return schema.validate(user);
+const validateRegisterUser = (user: IRegisterUser) => {
+  return RegisterSchema.safeParse(user);
 };
-const validateLoginUser = (user: LoginUser) => {
-  const schema = Joi.object({
-    email: Joi.string().email().trim().min(4).required(),
-    password: passwordComplexity().required(),
-  });
-  return schema.validate(user);
+const validateLoginUser = (user: ILoginUser) => {
+  return LoginSchema.safeParse(user);
 };
-const validateResetPassword = (password: {
-  password: string;
-  confirmPassword: string;
-}) => {
-  const schema = Joi.object({
-    password: passwordComplexity().required(),
-    confirmPassword: Joi.string()
-      .valid(Joi.ref("password"))
-      .required()
-      .messages({
-        "any.only": "Passwords do not match",
-      }),
-  });
-  return schema.validate(password);
+const validateForgotPassword = (email: string) => {
+  return ForgotPasswordSchema.safeParse(email);
 };
-
+const validateResetPassword = (password: IResetPassword) => {
+  return ResetPasswordSchema.safeParse(password);
+};
 const validateUpdateUser = (
   user: Partial<IUser> & { image: { url: string; publicId: string | null } },
 ) => {
-  const schema = Joi.object({
-    username: Joi.string().trim().min(3).max(10),
-    email: Joi.string().email().trim().min(4),
-    password: passwordComplexity(),
-    image: Joi.object({
-      url: Joi.string().uri(),
-      publicId: Joi.string().allow(null),
-    }).optional(),
-  });
-  return schema.validate(user);
+  return UpdateUserSchema.safeParse(user);
 };
 
 const User = model<IUser>("User", userSchema);
@@ -135,5 +102,6 @@ export {
   validateRegisterUser,
   validateLoginUser,
   validateResetPassword,
+  validateForgotPassword,
   validateUpdateUser,
 };
