@@ -1,0 +1,115 @@
+import express, { type Request, type Response } from "express";
+import asyncHandler from "express-async-handler";
+import { v2 as cloudinary } from "cloudinary";
+import { User, validateUpdateUser } from "../models/User.js";
+import fs from "fs";
+import bcrypt from "bcryptjs";
+
+// GET ALL USERS
+const getAllUsers = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const user = await User.find().select("-password");
+    res.status(200).json(user);
+    return;
+  },
+);
+
+// GET USER BY ID
+const getUserById = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const user = await User.findById(req.params.id).select("-password");
+    res.status(200).json(user);
+    return;
+  },
+);
+
+// UPDATE USER
+const updateUser = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { error } = validateUpdateUser(req.body);
+    if (error) {
+      res
+        .status(400)
+        .json({ message: error.details[0]?.message || "Invalid Input" });
+      return;
+    }
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+        },
+      },
+      { new: true, runValidators: true },
+    ).select("-password");
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+    res.status(200).json(user);
+    return;
+  },
+);
+
+// DELETE USER
+const deleteUser = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      await User.findByIdAndDelete(req.params.id);
+      res.status(200).json({ message: "User deleted successfully" });
+      return;
+    } else {
+      res.status(404).json({ message: "User was not found" });
+      return;
+    }
+  },
+);
+
+// Upload User Profile Picture
+const uploadUserPicture = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const id = req.user?.id;
+    if (!id) {
+      res.status(401).json({ message: "Not authorized" });
+      return;
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(404).json({ message: "User was not found" });
+      return;
+    }
+    if (!req.file) {
+      res.status(400).json({ message: "No file provided" });
+      return;
+    }
+
+    const result = await cloudinary.uploader.upload(req.file.path);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          profilePicture: {
+            url: result.secure_url,
+            publicId: result.public_id,
+          },
+        },
+      },
+      { new: true },
+    ).select("-password");
+
+    fs.unlinkSync(req.file.path);
+    res.status(200).json(updatedUser);
+    return;
+  },
+);
+
+export { getAllUsers, getUserById, updateUser, deleteUser, uploadUserPicture };
