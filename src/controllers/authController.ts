@@ -69,27 +69,6 @@ const login = asyncHandler(
   },
 );
 
-// Get Register Page
-const getRegisterPage = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    res.render("register");
-  },
-);
-
-// Get Login Page
-const getLoginPage = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    res.render("login");
-  },
-);
-
-// Forgot Password
-const getForgotPasswordPage = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    res.render("forgot-password");
-  },
-);
-
 // Send Forgot Password Link
 const sendForgotPasswodLink = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
@@ -127,31 +106,9 @@ const sendForgotPasswodLink = asyncHandler(
         return res.status(500).json({ message: "Something went wrong" });
       } else {
         console.log(`Email Sent: ${success.response}`);
-        res.render("link-send", { email });
+        return res.status(200).json({message: "Password reset link sent successfully to your email"})
       }
     });
-  },
-);
-
-const getResetPasswordPage = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const user = await User.findById(req.params.userId);
-    if (!user) {
-      res.status(404).json({ message: "User was not found" });
-      return;
-    }
-    const secret = process.env.JWT_SECRET_KEY + user.password;
-    try {
-      jwt.verify(req.params.token as string, secret as string);
-      res.render("reset-password", {
-        email: user.email,
-        userId: req.params.userId,
-        token: req.params.token,
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(400).json({ message: "Invalid or expired token" });
-    }
   },
 );
 
@@ -178,7 +135,7 @@ const resetPassword = asyncHandler(
       user.password = req.body.password;
 
       await user.save();
-      res.render("success-link");
+      res.status(200).json({ message: "Password updated successfully" });
     } catch (err) {
       console.error(err);
       res.status(400).json({ message: "Something went wrong" });
@@ -190,10 +147,6 @@ const resetPassword = asyncHandler(
 export {
   register,
   login,
-  getRegisterPage,
-  getLoginPage,
-  getForgotPasswordPage,
   sendForgotPasswodLink,
-  getResetPasswordPage,
   resetPassword,
 };

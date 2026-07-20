@@ -11,8 +11,6 @@ import helmet from "helmet";
 import cors from "cors"
 dotenv.config();
 const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 connectToDB();
 
@@ -26,8 +24,6 @@ app.use("/auth", auth);
 app.use("/users", users);
 app.use("/posts", posts);
 
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
 
 app.use(notFound);
 app.use(errorHandler);
