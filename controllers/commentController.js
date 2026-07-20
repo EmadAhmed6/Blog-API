@@ -99,7 +99,6 @@ const likeComment = asyncHandler(async (req, res) => {
 });
 
 // Upload Comment Image
-
 const uploadCommentImage = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
 

@@ -3,7 +3,7 @@ const { Post } = require("../models/Post");
 const { Comment } = require("../models/Comment");
 
 const verifyToken = (req, res, next) => {
-  let token = req.headers.token;
+  let token = req.headers.authorization;
   if (token) {
     try {
       if (token.startsWith("Bearer ")) {
