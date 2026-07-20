@@ -4,16 +4,16 @@ import { notFound, errorHandler } from "./middlewares/errors.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config();
-const app = express();
 import auth from "./routers/auth.js";
 import users from "./routers/users.js";
 import posts from "./routers/posts.js";
 import helmet from "helmet";
 import cors from "cors"
+dotenv.config();
+const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 connectToDB();
 
 app.use(helmet());
