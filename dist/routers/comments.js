@@ -8,7 +8,7 @@ router
     .get(verifyToken, getAllComments)
     .post(verifyToken, createComment);
 router
-    .route("/:id")
+    .route("/:commentId")
     .put(verifyCommentOwner, updateComment)
     .delete(verifyCommentOwner, deleteComment);
 router.post("/:commentId/upload", verifyCommentOwner, upload.single("image"), uploadCommentImage);

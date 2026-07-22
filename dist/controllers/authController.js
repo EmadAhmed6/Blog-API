@@ -3,14 +3,14 @@ import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import { validateRegisterUser, User, validateLoginUser, validateResetPassword, } from "../models/User.js";
+import { validateRegisterUser, User, validateLoginUser, validateResetPassword, validateForgotPassword, } from "../models/User.js";
 // Register User
 const register = asyncHandler(async (req, res) => {
-    const { error } = validateRegisterUser(req.body);
-    if (error) {
+    const { error, success } = validateRegisterUser(req.body);
+    if (!success) {
         res
             .status(400)
-            .json({ message: error.details[0]?.message || "Invalid Input" });
+            .json({ message: error.issues[0]?.message || "Invalid Input" });
         return;
     }
     const user = await User.findOne({ email: req.body.email });
@@ -32,11 +32,11 @@ const register = asyncHandler(async (req, res) => {
 });
 // Login User
 const login = asyncHandler(async (req, res) => {
-    const { error } = validateLoginUser(req.body);
-    if (error) {
+    const { error, success } = validateLoginUser(req.body);
+    if (!success) {
         res
             .status(400)
-            .json({ message: error.details[0]?.message || "Invalid Input" });
+            .json({ message: error.issues[0]?.message || "Invalid Input" });
         return;
     }
     const user = await User.findOne({ email: req.body.email });
@@ -54,20 +54,13 @@ const login = asyncHandler(async (req, res) => {
     res.status(200).json({ ...others, token });
     return;
 });
-// Get Register Page
-const getRegisterPage = asyncHandler(async (req, res) => {
-    res.render("register");
-});
-// Get Login Page
-const getLoginPage = asyncHandler(async (req, res) => {
-    res.render("login");
-});
-// Forgot Password
-const getForgotPasswordPage = asyncHandler(async (req, res) => {
-    res.render("forgot-password");
-});
 // Send Forgot Password Link
 const sendForgotPasswodLink = asyncHandler(async (req, res) => {
+    const { error, success } = validateForgotPassword(req.body);
+    if (!success) {
+        res.status(400).json({ message: error.issues[0]?.message });
+        return;
+    }
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
@@ -103,36 +96,18 @@ const sendForgotPasswodLink = asyncHandler(async (req, res) => {
         }
         else {
             console.log(`Email Sent: ${success.response}`);
-            res.render("link-send", { email });
+            return res.status(200).json({
+                message: "Password reset link sent successfully to your email",
+            });
         }
     });
 });
-const getResetPasswordPage = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.userId);
-    if (!user) {
-        res.status(404).json({ message: "User was not found" });
-        return;
-    }
-    const secret = process.env.JWT_SECRET_KEY + user.password;
-    try {
-        jwt.verify(req.params.token, secret);
-        res.render("reset-password", {
-            email: user.email,
-            userId: req.params.userId,
-            token: req.params.token,
-        });
-    }
-    catch (err) {
-        console.error(err);
-        res.status(400).json({ message: "Invalid or expired token" });
-    }
-});
 const resetPassword = asyncHandler(async (req, res) => {
-    const { error } = validateResetPassword(req.body);
-    if (error) {
+    const { error, success } = validateResetPassword(req.body);
+    if (!success) {
         res
             .status(400)
-            .json({ message: error.details[0]?.message || "Invalid Input" });
+            .json({ message: error.issues[0]?.message || "Invalid Input" });
         return;
     }
     const user = await User.findById(req.params.userId);
@@ -147,7 +122,7 @@ const resetPassword = asyncHandler(async (req, res) => {
         req.body.password = await bcrypt.hash(req.body.password, salt);
         user.password = req.body.password;
         await user.save();
-        res.render("success-link");
+        res.status(200).json({ message: "Password updated successfully" });
     }
     catch (err) {
         console.error(err);
@@ -155,5 +130,5 @@ const resetPassword = asyncHandler(async (req, res) => {
         return;
     }
 });
-export { register, login, getRegisterPage, getLoginPage, getForgotPasswordPage, sendForgotPasswodLink, getResetPasswordPage, resetPassword, };
+export { register, login, sendForgotPasswodLink, resetPassword };
 //# sourceMappingURL=authController.js.map

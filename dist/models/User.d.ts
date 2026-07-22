@@ -1,15 +1,9 @@
-import Joi from "joi";
+import { z } from "zod";
 import mongoose, { Document } from "mongoose";
+import { type ILoginUser, type IRegisterUser, type IResetPassword } from "../schemas/auth.js";
 interface UserBase {
     username: string;
     email: string;
-}
-interface RegisterUser extends UserBase {
-    password: string;
-}
-interface LoginUser {
-    email: string;
-    passsword: string;
 }
 interface IUser extends Document, UserBase {
     password: string;
@@ -20,18 +14,36 @@ interface IUser extends Document, UserBase {
     };
     generateToken: () => string;
 }
-declare const validateRegisterUser: (user: RegisterUser) => Joi.ValidationResult<any>;
-declare const validateLoginUser: (user: LoginUser) => Joi.ValidationResult<any>;
-declare const validateResetPassword: (password: {
+declare const validateRegisterUser: (user: IRegisterUser) => z.ZodSafeParseResult<{
+    username: string;
+    email: string;
+    password: string;
+}>;
+declare const validateLoginUser: (user: ILoginUser) => z.ZodSafeParseResult<{
+    email: string;
+    password: string;
+}>;
+declare const validateForgotPassword: (email: string) => z.ZodSafeParseResult<{
+    email: string;
+}>;
+declare const validateResetPassword: (password: IResetPassword) => z.ZodSafeParseResult<{
     password: string;
     confirmPassword: string;
-}) => Joi.ValidationResult<any>;
+}>;
 declare const validateUpdateUser: (user: Partial<IUser> & {
     image: {
         url: string;
         publicId: string | null;
     };
-}) => Joi.ValidationResult<any>;
+}) => z.ZodSafeParseResult<{
+    username?: string | undefined;
+    email?: string | undefined;
+    password?: string | undefined;
+    image?: {
+        url: string;
+        publicId: string | null;
+    } | undefined;
+}>;
 declare const User: mongoose.Model<IUser, {}, {}, {}, Document<unknown, {}, IUser, {}, mongoose.DefaultSchemaOptions> & IUser & Required<{
     _id: mongoose.Types.ObjectId;
 }> & {
@@ -39,5 +51,5 @@ declare const User: mongoose.Model<IUser, {}, {}, {}, Document<unknown, {}, IUse
 } & {
     id: string;
 }, any, IUser>;
-export { User, validateRegisterUser, validateLoginUser, validateResetPassword, validateUpdateUser, };
+export { User, validateRegisterUser, validateLoginUser, validateResetPassword, validateForgotPassword, validateUpdateUser, };
 //# sourceMappingURL=User.d.ts.map

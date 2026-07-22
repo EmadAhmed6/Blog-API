@@ -7,11 +7,11 @@ const router = express.Router();
 // Crud
 router.route("/").get(verifyToken, getAllPosts).post(verifyToken, createPost);
 router
-    .route("/:id")
+    .route("/:postId")
     .get(verifyToken, getPostById)
     .put(verifyPostOwner, updatePost)
     .delete(verifyPostOwner, deletePost);
-router.put("/:id/like", verifyToken, likePost);
+router.put("/:postId/like", verifyToken, likePost);
 // Upload Image
 router.post("/upload", verifyToken, upload.single("image"), uploadPostImage);
 router.use("/:postId/comments", verifyToken, comments);

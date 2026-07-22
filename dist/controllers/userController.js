@@ -16,17 +16,19 @@ const getUserById = asyncHandler(async (req, res) => {
     res.status(200).json(user);
     return;
 });
-// Update User
+// UPDATE USER
 const updateUser = asyncHandler(async (req, res) => {
-    const { error } = validateUpdateUser(req.body);
-    if (error) {
+    const { success, error } = validateUpdateUser(req.body);
+    if (!success) {
         res
             .status(400)
-            .json({ message: error.details[0]?.message || "Invalid Input" });
+            .json({ message: error.issues[0]?.message || "Invalid Input" });
         return;
     }
-    const salt = await bcrypt.genSalt(10);
-    req.body.password = await bcrypt.hash(req.body.password, salt);
+    if (req.body.password) {
+        const salt = await bcrypt.genSalt(10);
+        req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
     const user = await User.findByIdAndUpdate(req.params.id, {
         $set: {
             username: req.body.username,
@@ -34,6 +36,10 @@ const updateUser = asyncHandler(async (req, res) => {
             password: req.body.password,
         },
     }, { new: true, runValidators: true }).select("-password");
+    if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+    }
     res.status(200).json(user);
     return;
 });

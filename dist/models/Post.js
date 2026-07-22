@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose, { Schema, Document, Types, model } from "mongoose";
-import Joi from "joi";
+import { CreatePostSchema, UpdatePostSchema, } from "../schemas/post.js";
 const PostSchema = new Schema({
     title: {
         type: String,
@@ -18,7 +18,6 @@ const PostSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: true,
     },
     category: {
         type: String,
@@ -29,6 +28,7 @@ const PostSchema = new Schema({
             url: { type: String },
             publicId: { type: String, default: null },
         },
+        _id: false,
         default: {
             url: "",
             publicId: null,
@@ -51,28 +51,10 @@ PostSchema.virtual("comments", {
     localField: "_id",
 });
 const validateCreatePost = (post) => {
-    const schema = Joi.object({
-        title: Joi.string().trim().min(2).max(32).required(),
-        description: Joi.string().trim().min(10).max(250).required(),
-        category: Joi.string().required(),
-        image: Joi.object({
-            url: Joi.string().uri().required(),
-            publicId: Joi.string().allow(null).required(),
-        }).optional(),
-    });
-    return schema.validate(post);
+    return CreatePostSchema.safeParse(post);
 };
 const validateUpdatePost = (post) => {
-    const schema = Joi.object({
-        title: Joi.string().trim().min(2).max(32),
-        description: Joi.string().trim().min(10).max(250),
-        category: Joi.string(),
-        image: Joi.object({
-            url: Joi.string().uri(),
-            publicId: Joi.string().allow(null),
-        }).optional(),
-    });
-    return schema.validate(post);
+    return UpdatePostSchema.safeParse(post);
 };
 const Post = model("Post", PostSchema);
 export { Post, validateCreatePost, validateUpdatePost };

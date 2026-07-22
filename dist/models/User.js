@@ -1,13 +1,8 @@
-import Joi from "joi";
+import { z } from "zod";
 import jwt from "jsonwebtoken";
 import mongoose, { Document, Schema, model } from "mongoose";
-const passwordComplexity = (value) => Joi.string()
-    .min(6)
-    .max(72)
-    .pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .messages({
-    "string.pattern.base": "Password must include uppercase, lowercase, and numbers",
-});
+import { ForgotPasswordSchema, LoginSchema, passwordSchema, RegisterSchema, ResetPasswordSchema, } from "../schemas/auth.js";
+import { UpdateUserSchema } from "../schemas/user.js";
 const userSchema = new Schema({
     username: {
         type: String,
@@ -51,44 +46,20 @@ userSchema.methods.generateToken = function () {
     return jwt.sign({ id: this._id, isAdmin: this.isAdmin, username: this.username }, process.env.JWT_SECRET_KEY);
 };
 const validateRegisterUser = (user) => {
-    const schema = Joi.object({
-        username: Joi.string().min(3).max(10).required(),
-        email: Joi.string().email().trim().min(4).required(),
-        password: passwordComplexity().required(),
-    });
-    return schema.validate(user);
+    return RegisterSchema.safeParse(user);
 };
 const validateLoginUser = (user) => {
-    const schema = Joi.object({
-        email: Joi.string().email().trim().min(4).required(),
-        password: passwordComplexity().required(),
-    });
-    return schema.validate(user);
+    return LoginSchema.safeParse(user);
+};
+const validateForgotPassword = (email) => {
+    return ForgotPasswordSchema.safeParse(email);
 };
 const validateResetPassword = (password) => {
-    const schema = Joi.object({
-        password: passwordComplexity().required(),
-        confirmPassword: Joi.string()
-            .valid(Joi.ref("password"))
-            .required()
-            .messages({
-            "any.only": "Passwords do not match",
-        }),
-    });
-    return schema.validate(password);
+    return ResetPasswordSchema.safeParse(password);
 };
 const validateUpdateUser = (user) => {
-    const schema = Joi.object({
-        username: Joi.string().trim().min(3).max(10),
-        email: Joi.string().email().trim().min(4),
-        password: passwordComplexity(),
-        image: Joi.object({
-            url: Joi.string().uri(),
-            publicId: Joi.string().allow(null),
-        }).optional(),
-    });
-    return schema.validate(user);
+    return UpdateUserSchema.safeParse(user);
 };
 const User = model("User", userSchema);
-export { User, validateRegisterUser, validateLoginUser, validateResetPassword, validateUpdateUser, };
+export { User, validateRegisterUser, validateLoginUser, validateResetPassword, validateForgotPassword, validateUpdateUser, };
 //# sourceMappingURL=User.js.map

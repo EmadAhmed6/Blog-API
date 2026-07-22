@@ -1,22 +1,23 @@
 import express, {} from "express";
 import asyncHandler from "express-async-handler";
 import { Post, validateCreatePost, validateUpdatePost, } from "../models/Post.js";
+import { User } from "../models/User.js";
 import path from "path";
 import fs from "fs";
 import cloudinary from "../utils/cloudinary.js";
 import { Types } from "mongoose";
 // get All Posts
 const getAllPosts = asyncHandler(async (req, res) => {
-    const pageNumber = Number(req.query.pageNumber);
+    const pageNumber = Number(req.query.pageNumber) || 1;
     const postsPerPage = 2;
     const posts = await Post.find()
-        .populate("user", ["_id", "username"])
-        .populate("likes", ["_id", "username"])
+        .populate("user", "username")
+        .populate("likes", "username")
         .populate({
         path: "comments",
         populate: {
             path: "user",
-            select: ["_id", "username"],
+            select: "username",
         },
     })
         .skip((pageNumber - 1) * postsPerPage)
@@ -26,14 +27,14 @@ const getAllPosts = asyncHandler(async (req, res) => {
 });
 // Get Post By Id
 const getPostById = asyncHandler(async (req, res) => {
-    const posts = await Post.findById(req.params.id)
-        .populate("user", ["_id", "username"])
-        .populate("likes", ["_id", "username"])
+    const posts = await Post.findById(req.params.postId)
+        .populate("user", "username")
+        .populate("likes", "username")
         .populate({
         path: "comments",
         populate: {
             path: "user",
-            select: ["_id", "username"],
+            select: "username",
         },
     });
     res.status(200).json(posts);
@@ -41,11 +42,11 @@ const getPostById = asyncHandler(async (req, res) => {
 });
 // Create Post
 const createPost = asyncHandler(async (req, res) => {
-    const { error } = validateCreatePost(req.body);
-    if (error) {
+    const { error, success } = validateCreatePost(req.body);
+    if (!success) {
         res
             .status(400)
-            .json({ message: error.details[0]?.message || "Invalid Input" });
+            .json({ message: error.issues[0]?.message || "Invalid Input" });
         return;
     }
     const newPost = new Post({
@@ -53,21 +54,23 @@ const createPost = asyncHandler(async (req, res) => {
         description: req.body.description,
         category: req.body.category,
         image: req.body.image,
+        user: req.user?.id,
     });
     const finalPost = await newPost.save();
+    await finalPost.populate("user", "username");
     res.status(201).json(finalPost);
     return;
 });
 // Update Post
 const updatePost = asyncHandler(async (req, res) => {
-    const { error } = validateUpdatePost(req.body);
-    if (error) {
+    const { error, success } = validateUpdatePost(req.body);
+    if (!success) {
         res
             .status(400)
-            .json({ message: error.details[0]?.message || "Invalid Input" });
+            .json({ message: error.issues[0]?.message || "Invalid Input" });
         return;
     }
-    const updatedPost = await Post.findByIdAndUpdate(req.params.id, {
+    const updatedPost = await Post.findByIdAndUpdate(req.params.postId, {
         $set: {
             title: req.body.title,
             description: req.body.description,
@@ -86,9 +89,9 @@ const updatePost = asyncHandler(async (req, res) => {
 });
 // Delete Post
 const deletePost = asyncHandler(async (req, res) => {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.postId);
     if (post) {
-        await Post.findByIdAndDelete(req.params.id);
+        await Post.findByIdAndDelete(req.params.postId);
         res.status(200).json({ message: "Post has been deleted successfully" });
     }
     else {
@@ -111,22 +114,22 @@ const uploadPostImage = asyncHandler(async (req, res) => {
 });
 // Like Post
 const likePost = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const postId = req.params.postId;
     const userId = req.user?.id;
     if (!userId) {
         res.status(401).json({ message: "You are not logged in" });
         return;
     }
-    const post = await Post.findById(id);
+    const post = await Post.findById(postId);
     if (!post) {
-        res.status(404).json({ message: "Post not found" });
+        res.status(404).json({ message: "Post was not found" });
         return;
     }
     const isLiked = post.likes.some((like) => like.toString() === userId);
     const userObjectId = new Types.ObjectId(userId);
-    const updatedPost = await Post.findByIdAndUpdate(id, isLiked
+    const updatedPost = await Post.findByIdAndUpdate(postId, isLiked
         ? { $pull: { likes: userObjectId } }
-        : { $push: { likes: userObjectId } }, { new: true }).populate("likes", ["_id", "username"]);
+        : { $push: { likes: userObjectId } }, { new: true }).populate("likes", "username");
     res.status(200).json(updatedPost);
     return;
 });

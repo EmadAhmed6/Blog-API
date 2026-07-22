@@ -1,18 +1,27 @@
 import mongoose, { Document, Types } from "mongoose";
-import Joi from "joi";
-interface IPost extends Document {
-    title: string;
-    description: string;
+import { type ICreatePost, type IUpdatePost } from "../schemas/post.js";
+interface IPost extends ICreatePost, Document {
     user: Types.ObjectId;
-    category: string;
-    image: {
-        url: string;
-        publicId: string | null;
-    };
     likes: Types.ObjectId[];
 }
-declare const validateCreatePost: (post: Omit<IPost, "user" | "likes">) => Joi.ValidationResult<any>;
-declare const validateUpdatePost: (post: Partial<Omit<IPost, "user" | "likes">>) => Joi.ValidationResult<any>;
+declare const validateCreatePost: (post: Omit<IPost, "user" | "likes">) => import("zod").ZodSafeParseResult<{
+    title: string;
+    description: string;
+    category: string;
+    image?: {
+        url: string;
+        publicId: string | null;
+    } | undefined;
+}>;
+declare const validateUpdatePost: (post: Partial<Omit<IUpdatePost, "user" | "likes">>) => import("zod").ZodSafeParseResult<{
+    title?: string | undefined;
+    description?: string | undefined;
+    category?: string | undefined;
+    image?: {
+        url: string;
+        publicId: string | null;
+    } | undefined;
+}>;
 declare const Post: mongoose.Model<IPost, {}, {}, {}, Document<unknown, {}, IPost, {}, mongoose.DefaultSchemaOptions> & IPost & Required<{
     _id: Types.ObjectId;
 }> & {

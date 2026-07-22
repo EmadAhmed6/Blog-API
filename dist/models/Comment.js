@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose, { Document, model, Schema, Types } from "mongoose";
-import Joi from "joi";
+import { CreateCommentSchema, UpdateCommentSchema } from "../schemas/comment.js";
 const CommentSchema = new Schema({
     postId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -35,25 +35,10 @@ const CommentSchema = new Schema({
     ],
 }, { timestamps: true });
 const validateCreateComment = (comment) => {
-    const schema = Joi.object({
-        postId: Joi.string().required(),
-        text: Joi.string().trim().required(),
-        image: Joi.object({
-            url: Joi.string().uri().required(),
-            publicId: Joi.string().allow(null).required(),
-        }).optional(),
-    });
-    return schema.validate(comment);
+    return CreateCommentSchema.safeParse(comment);
 };
 const validateUpdateComment = (comment) => {
-    const schema = Joi.object({
-        text: Joi.string().trim(),
-        image: Joi.object({
-            url: Joi.string().uri(),
-            publicId: Joi.string().allow(null),
-        }).optional(),
-    });
-    return schema.validate(comment);
+    return UpdateCommentSchema.safeParse(comment);
 };
 const Comment = model("Comment", CommentSchema);
 export { Comment, validateCreateComment, validateUpdateComment };

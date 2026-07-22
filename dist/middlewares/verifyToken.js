@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Post } from "../models/Post.js";
-const { Comment } = require("../models/Comment");
+import { Comment } from "../models/Comment.js";
 const verifyToken = (req, res, next) => {
     let token = req.headers.authorization;
     const secret = process.env.JWT_SECRET_KEY;
@@ -56,11 +56,11 @@ const verifyPostOwner = (req, res, next) => {
         if (!req.user) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(req.params.postId);
         if (!post) {
             return res.status(404).json({ message: "Post was not found" });
         }
-        if (post.user.toString() === req.user.id || req.user.isAdmin) {
+        if (post.user?.toString() === req.user.id || req.user.isAdmin) {
             next();
         }
         else {

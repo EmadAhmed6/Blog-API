@@ -20,12 +20,17 @@ const getAllPosts = asyncHandler(
       .populate("likes", ["_id", "username"])
       .populate({
         path: "comments",
-        populate: {
-          path: "user",
-          select: ["_id", "username"],
-        },
+        populate: [
+          {
+            path: "user",
+            select: ["_id", "username"],
+          },
+          {
+            path: "likes",
+            select: ["_id", "username"],
+          },
+        ],
       })
-
       .skip((pageNumber - 1) * postsPerPage)
       .limit(postsPerPage);
     res.status(200).json(posts);
@@ -41,10 +46,16 @@ const getPostById = asyncHandler(
       .populate("likes", ["_id", "username"])
       .populate({
         path: "comments",
-        populate: {
-          path: "user",
-          select: ["_id", "username"],
-        },
+        populate: [
+          {
+            path: "user",
+            select: ["_id", "username"],
+          },
+          {
+            path: "likes",
+            select: ["_id", "username"],
+          },
+        ],
       });
     res.status(200).json(posts);
     return;
