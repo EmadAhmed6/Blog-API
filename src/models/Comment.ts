@@ -20,6 +20,7 @@ interface IComment extends Omit<ICreateComment, "postId">, Document {
   user: Types.ObjectId;
   likes: Types.ObjectId[];
   commentsCount: Number;
+  commentLikesCount: Number;
 }
 const CommentSchema = new Schema<IComment>(
   {
@@ -54,6 +55,10 @@ const CommentSchema = new Schema<IComment>(
         ref: "User",
       },
     ],
+    commentLikesCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
 );

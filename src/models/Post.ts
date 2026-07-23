@@ -12,6 +12,7 @@ interface IPost extends ICreatePost, Document {
   sharedPost: Types.ObjectId;
   sharesCount: Number;
   commentsCount: Number;
+  postLikesCount: Number;
 }
 const PostSchema = new Schema<IPost>(
   {
@@ -19,13 +20,13 @@ const PostSchema = new Schema<IPost>(
       type: String,
       required: true,
       trim: true,
-      minlength: 2,
+      minlength: 1,
       maxlength: 32,
     },
     description: {
       type: String,
       required: true,
-      minlength: 10,
+      minlength: 1,
       maxlength: 250,
     },
     user: {
@@ -63,6 +64,10 @@ const PostSchema = new Schema<IPost>(
       default: 0,
     },
     commentsCount: {
+      type: Number,
+      default: 0,
+    },
+    postLikesCount: {
       type: Number,
       default: 0,
     },

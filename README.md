@@ -106,7 +106,7 @@ erDiagram
         ObjectId[] likes FK
         ObjectId sharedPost FK
         number sharesCount
-        number likesCount
+        number postLikesCount
         number commentsCount
         datetime createdAt
         datetime updatedAt
@@ -119,6 +119,7 @@ erDiagram
         string text
         object image
         ObjectId[] likes FK
+        number commentLikesCount
         datetime createdAt
         datetime updatedAt
     }

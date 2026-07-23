@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const CreatePostSchema = z.object({
-  title: z.string().trim().min(2).max(32),
-  description: z.string().trim().min(10).max(250),
+  title: z.string().trim().min(1).max(32),
+  description: z.string().trim().min(1).max(250),
   category: z.string(),
   image: z
     .object({

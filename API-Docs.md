@@ -598,6 +598,9 @@ List of posts returned successfully.
         }
       ],
       "comments": [],
+      "sharesCount": 0,
+      "postLikesCount": 1,
+      "commentsCount": 0,
       "createdAt": "2026-07-20T18:27:29.000Z",
       "updatedAt": "2026-07-20T18:27:29.000Z"
     }
@@ -648,6 +651,9 @@ Post created successfully. Returns the populated post resource.
     },
     "likes": [],
     "comments": [],
+    "sharesCount": 0,
+    "postLikesCount": 0,
+    "commentsCount": 0,
     "createdAt": "2026-07-20T18:27:29.000Z",
     "updatedAt": "2026-07-20T18:27:29.000Z"
   }
@@ -702,6 +708,9 @@ Post retrieved successfully.
     },
     "likes": [],
     "comments": [],
+    "sharesCount": 0,
+    "postLikesCount": 0,
+    "commentsCount": 0,
     "createdAt": "2026-07-20T18:27:29.000Z",
     "updatedAt": "2026-07-20T18:27:29.000Z"
   }
@@ -760,6 +769,9 @@ Post updated successfully. Returns updated post document.
       "publicId": "blog_image_123"
     },
     "likes": [],
+    "sharesCount": 0,
+    "postLikesCount": 0,
+    "commentsCount": 0,
     "createdAt": "2026-07-20T18:27:29.000Z",
     "updatedAt": "2026-07-20T21:28:00.000Z"
   }
@@ -876,6 +888,9 @@ Post liked status updated. Returns the updated post object showing the new likes
         "username": "Ahmed"
       }
     ],
+    "sharesCount": 0,
+    "postLikesCount": 1,
+    "commentsCount": 0,
     "createdAt": "2026-07-20T18:27:29.000Z",
     "updatedAt": "2026-07-20T21:28:10.000Z"
   }
@@ -935,7 +950,7 @@ Post shared successfully.
       "likes": [],
       "sharedPost": "65f1a2b3c4d5e6f789012345",
       "sharesCount": 0,
-      "likesCount": 0,
+      "postLikesCount": 0,
       "commentsCount": 0,
       "createdAt": "2026-07-23T08:30:00.000Z",
       "updatedAt": "2026-07-23T08:30:00.000Z"
@@ -1040,6 +1055,7 @@ Comments retrieved successfully.
         "publicId": "comment_image_123"
       },
       "likes": [],
+      "commentLikesCount": 0,
       "createdAt": "2026-07-20T18:27:27.000Z",
       "updatedAt": "2026-07-20T18:27:27.000Z"
     }
@@ -1098,6 +1114,7 @@ Comment created successfully. Returns the populated comment payload.
       "publicId": null
     },
     "likes": [],
+    "commentLikesCount": 0,
     "createdAt": "2026-07-20T18:27:27.000Z",
     "updatedAt": "2026-07-20T18:27:27.000Z"
   }
@@ -1156,6 +1173,7 @@ Comment text updated successfully.
       "publicId": "comment_image_123"
     },
     "likes": [],
+    "commentLikesCount": 0,
     "createdAt": "2026-07-20T18:27:27.000Z",
     "updatedAt": "2026-07-20T21:28:30.000Z"
   }
@@ -1284,6 +1302,7 @@ Comment like status updated successfully.
         "username": "Ahmed"
       }
     ],
+    "commentLikesCount": 1,
     "createdAt": "2026-07-20T18:27:27.000Z",
     "updatedAt": "2026-07-20T21:28:40.000Z"
   }

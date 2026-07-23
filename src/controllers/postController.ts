@@ -11,7 +11,7 @@ import cloudinary from "../utils/cloudinary.js";
 import { Types } from "mongoose";
 import { User } from "../models/User.js";
 
-// get All Posts
+// GET ALL POSTS
 const getAllPosts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const pageNumber = Number(req.query.pageNumber) || 1;
@@ -39,7 +39,7 @@ const getAllPosts = asyncHandler(
   },
 );
 
-// Get Post By Id
+// GET POST BY ID
 const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const posts = await Post.findById(req.params.postId)
@@ -63,7 +63,7 @@ const getPostById = asyncHandler(
   },
 );
 
-// Create Post
+// CREATE POST
 const createPost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateCreatePost(req.body);
@@ -98,7 +98,7 @@ const createPost = asyncHandler(
   },
 );
 
-// Update Post
+// UPDATE POST
 const updatePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateUpdatePost(req.body);
@@ -131,7 +131,7 @@ const updatePost = asyncHandler(
   },
 );
 
-// Delete Post
+// DELETE POST
 const deletePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const post = await Post.findById(req.params.postId);
@@ -153,6 +153,7 @@ const deletePost = asyncHandler(
   },
 );
 
+// UPLOAD IMAGE POST
 const uploadPostImage = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     if (!req.file) {
@@ -174,7 +175,7 @@ const uploadPostImage = asyncHandler(
   },
 );
 
-// Like Post
+// LIKE POST
 const likePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const postId = req.params.postId;
@@ -196,8 +197,8 @@ const likePost = asyncHandler(
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
       isLiked
-        ? { $pull: { likes: userObjectId } as any }
-        : { $push: { likes: userObjectId } as any },
+        ? { $pull: { likes: userObjectId }, $inc: { postLikesCount: -1 } as any }
+        : { $push: { likes: userObjectId }, $inc: { postLikesCount: 1 } as any },
       { new: true },
     ).populate("likes", ["_id", "username"]);
 
@@ -206,6 +207,7 @@ const likePost = asyncHandler(
   },
 );
 
+// SHARE POST
 const sharePost = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {
     res
@@ -244,6 +246,7 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
   });
   return;
 });
+
 export {
   getAllPosts,
   getPostById,

@@ -445,7 +445,7 @@
  *         sharesCount:
  *           type: number
  *           example: 5
- *         likesCount:
+ *         postLikesCount:
  *           type: number
  *           example: 10
  *         commentsCount:

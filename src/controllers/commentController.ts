@@ -131,7 +131,7 @@ const deleteComment = asyncHandler(
       res
         .status(404)
         .json({ success: false, message: "Comment was not found" });
-      return
+      return;
     }
   },
 );
@@ -168,7 +168,9 @@ const likeComment = asyncHandler(
     );
     const updatedComment = await Comment.findByIdAndUpdate(
       new Types.ObjectId(commentId),
-      isLiked ? { $pull: { likes: userId } } : { $push: { likes: userId } },
+      isLiked
+        ? { $pull: { likes: userId }, $inc: { commentLikesCount: -1 } }
+        : { $push: { likes: userId }, $inc: { commentLikesCount: 1 } },
       { new: true },
     ).populate("likes", ["_id", "username"]);
 
