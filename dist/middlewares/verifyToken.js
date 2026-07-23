@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { Post } from "../models/Post.js";
-import { Comment } from "../models/Comment.js";
+import { Post } from "../modules/posts/post.model.js";
+import { Comment } from "../modules/comment/comment.model.js";
 const verifyToken = (req, res, next) => {
     let token = req.headers.authorization;
     const secret = process.env.JWT_SECRET_KEY;

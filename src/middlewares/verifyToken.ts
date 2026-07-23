@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { Post } from "../models/Post.js";
-import { Comment } from "../models/Comment.js";
+import { Post } from "../modules/posts/post.model.js";
+import { Comment } from "../modules/comment/comment.model.js";
 import type { Request, Response, NextFunction } from "express";
 
 interface JWTUserPayload {

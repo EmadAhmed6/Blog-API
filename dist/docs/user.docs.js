@@ -239,6 +239,12 @@ export {};
  *         isAdmin:
  *           type: boolean
  *           example: false
+ *         isVerified:
+ *           type: boolean
+ *           example: false
+ *         postsCount:
+ *           type: number
+ *           example: 3
  *         profilePicture:
  *           type: object
  *           properties:

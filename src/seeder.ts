@@ -1,4 +1,4 @@
-import { Post }  from "./models/Post.js"; 
+import { Post } from "./modules/posts/post.model.js";
 import posts  from './data.js';
 import connectToDB  from "./config/db.js";
 import dotenv  from "dotenv";

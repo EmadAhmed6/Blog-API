@@ -370,6 +370,9 @@ export {};
  *                 type: string
  *               username:
  *                 type: string
+ *         commentLikesCount:
+ *           type: number
+ *           example: 3
  *         createdAt:
  *           type: string
  *           format: date-time

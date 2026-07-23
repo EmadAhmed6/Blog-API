@@ -132,32 +132,45 @@ erDiagram
 ```text
 blog-api/
 ├── src/
-│   ├── config/             # Database connection setups
-│   │   └── db.ts
-│   ├── controllers/        # Request handlers & controller logic
-│   │   ├── authController.ts
-│   │   ├── commentController.ts
-│   │   ├── postController.ts
-│   │   └── userController.ts
+│   ├── app.ts              # Entrypoint file starting the Server
+│   ├── config/             # Connection and swagger configuration
+│   │   ├── db.ts
+│   │   └── swagger.ts
+│   ├── data.ts             # Mock seed data structures
+│   ├── docs/               # Swagger API JSDoc documentation files
+│   │   ├── auth.docs.ts
+│   │   ├── comments.docs.ts
+│   │   ├── posts.docs.ts
+│   │   └── user.docs.ts
 │   ├── middlewares/        # Custom middlewares (Auth, Upload, Errors)
 │   │   ├── errors.ts       # Global error processing
 │   │   ├── multer.ts       # File upload middleware using disk storage
 │   │   └── verifyToken.ts  # Route guards for token & owner validation
-│   ├── models/             # Mongoose Schemas & Joi validators
-│   │   ├── Comment.ts
-│   │   ├── Post.ts
-│   │   └── User.ts
-│   ├── routers/            # Router endpoints definition
-│   │   ├── auth.ts
-│   │   ├── comments.ts
-│   │   ├── posts.ts
-│   │   └── users.ts
+│   ├── modules/            # Feature-based modular components
+│   │   ├── auth/           # Authentication feature module
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.model.ts
+│   │   │   ├── auth.routes.ts
+│   │   │   └── auth.schema.ts
+│   │   ├── comment/        # Comments feature module
+│   │   │   ├── comment.controller.ts
+│   │   │   ├── comment.model.ts
+│   │   │   ├── comment.routes.ts
+│   │   │   └── comment.schema.ts
+│   │   ├── posts/          # Posts feature module
+│   │   │   ├── post.model.ts
+│   │   │   ├── post.routes.ts
+│   │   │   ├── post.schema.ts
+│   │   │   └── posts.controller.ts
+│   │   └── user/           # User feature module
+│   │       ├── user.controller.ts
+│   │       ├── user.model.ts
+│   │       ├── user.routes.ts
+│   │       └── user.schema.ts
+│   ├── seeder.ts           # Seeding script for bulk updates
 │   ├── types/              # Custom express request global typings
-│   ├── utils/              # Third-party configuration helpers
-│   │   └── cloudinary.ts   # Cloudinary Client integration
-│   ├── app.ts              # Entrypoint file starting the Server
-│   ├── data.ts             # Mock seed data structures
-│   └── seeder.ts           # Seeding script for bulk updates
+│   └── utils/              # Third-party configuration helpers
+│       └── cloudinary.ts   # Cloudinary Client integration
 ├── dist/                   # Transpiled build output
 ├── tsconfig.json           # Compiler rules
 ├── package.json            # Scripts & packages manager
