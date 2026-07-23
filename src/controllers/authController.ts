@@ -27,8 +27,8 @@ const sendEmail = async (to: string, subject: string, html: string) => {
   });
 };
 
-let otpStore: Record<string, number> = {};
 // Register User
+let otpStore: Record<string, number> = {};
 const register = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateRegisterUser(req.body);
@@ -56,7 +56,7 @@ const register = asyncHandler(
     });
 
     const finalUser = await newUser.save();
-    const otp = Math.floor(10000 + Math.random() * 90000);
+    const otp = Math.floor(100000 + Math.random() * 900000);
     otpStore[finalUser.email] = otp;
     await sendEmail(
       finalUser.email,
@@ -66,22 +66,27 @@ const register = asyncHandler(
         <p>Your Verification Code is: <b>${otp}</b></p>
       </div>`,
     );
+
     const token = finalUser.generateToken();
     const { password, ...others } = finalUser.toObject();
     res.status(200).json({
       success: true,
-      message:
-        "Registered Successfully, Check your email for verification code",
-      token,
-      ...others,
+      data: {
+        message:
+          "Registered Successfully, Check your email for verification code",
+        token,
+        ...others,
+      },
     });
   },
 );
 
-const verifyEmailOtp = asyncHandler(async (req: Request, res: Response) => {
+const verifyEmailOTP = asyncHandler(async (req: Request, res: Response) => {
   const { email, otp } = req.body;
   if (!otpStore[email] || otpStore[email] !== Number(otp)) {
-    res.status(400).json({ success: false, message: "Invalid or expired otp" });
+    res
+      .status(400)
+      .json({ success: false, message: "Invalid or expired token" });
     return;
   }
   const user = await User.findOne({ email });
@@ -89,15 +94,12 @@ const verifyEmailOtp = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ success: false, message: "Email was not found" });
     return;
   }
-
   user.isVerified = true;
   await user.save();
-  delete otpStore[email];
   const { password, ...others } = user.toObject();
   res.status(200).json({
     success: true,
-    message: "Account verified successfully",
-    ...others,
+    data: { message: "Account verified successfully", ...others },
   });
 });
 
@@ -130,7 +132,7 @@ const login = asyncHandler(
     }
     const token = user.generateToken();
     const { password, ...others } = user.toObject();
-    res.status(200).json({ success: true, ...others, token });
+    res.status(200).json({ success: true, data: { ...others, token } });
     return;
   },
 );
@@ -166,7 +168,7 @@ const sendForgotPasswodLink = asyncHandler(
     );
     res.status(200).json({
       success: true,
-      message: "Password reset link sent successfully to your email",
+      data: { message: "Password reset link sent successfully to your email" },
     });
   },
 );
@@ -194,7 +196,9 @@ const resetPassword = asyncHandler(
       user.password = req.body.password;
 
       await user.save();
-      res.status(200).json({ message: "Password updated successfully" });
+      res
+        .status(200)
+        .json({ data: { message: "Password updated successfully" } });
     } catch (err) {
       console.error(err);
       res.status(400).json({ message: "Something went wrong" });
@@ -208,5 +212,5 @@ export {
   login,
   sendForgotPasswodLink,
   resetPassword,
-  verifyEmailOtp,
+  verifyEmailOTP,
 };

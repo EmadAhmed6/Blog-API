@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 const getAllUsers = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const user = await User.find().select("-password");
-    res.status(200).json(user);
+    res.status(200).json({ success: true, data: user });
     return;
   },
 );
@@ -18,7 +18,7 @@ const getAllUsers = asyncHandler(
 const getUserById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const user = await User.findById(req.params.id).select("-password");
-    res.status(200).json(user);
+    res.status(200).json({ success: true, data: user });
     return;
   },
 );
@@ -28,9 +28,10 @@ const updateUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { success, error } = validateUpdateUser(req.body);
     if (!success) {
-      res
-        .status(400)
-        .json({ message: error.issues[0]?.message || "Invalid Input" });
+      res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || "Invalid Input",
+      });
       return;
     }
 
@@ -51,10 +52,10 @@ const updateUser = asyncHandler(
       { new: true, runValidators: true },
     ).select("-password");
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      res.status(404).json({ success: false, message: "User not found" });
       return;
     }
-    res.status(200).json(user);
+    res.status(200).json({ success: true, data: user });
     return;
   },
 );
@@ -65,10 +66,12 @@ const deleteUser = asyncHandler(
     const user = await User.findById(req.params.id);
     if (user) {
       await User.findByIdAndDelete(req.params.id);
-      res.status(200).json({ message: "User deleted successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "User deleted successfully" });
       return;
     } else {
-      res.status(404).json({ message: "User was not found" });
+      res.status(404).json({ success: false, message: "User was not found" });
       return;
     }
   },
@@ -79,16 +82,16 @@ const uploadUserPicture = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const id = req.user?.id;
     if (!id) {
-      res.status(401).json({ message: "Not authorized" });
+      res.status(401).json({ success: false, message: "Not authorized" });
       return;
     }
     const user = await User.findById(id);
     if (!user) {
-      res.status(404).json({ message: "User was not found" });
+      res.status(404).json({ success: false, message: "User was not found" });
       return;
     }
     if (!req.file) {
-      res.status(400).json({ message: "No file provided" });
+      res.status(400).json({ success: false, message: "No file provided" });
       return;
     }
 
@@ -108,7 +111,7 @@ const uploadUserPicture = asyncHandler(
     ).select("-password");
 
     fs.unlinkSync(req.file.path);
-    res.status(200).json(updatedUser);
+    res.status(200).json({ success: true, data: updatedUser });
     return;
   },
 );

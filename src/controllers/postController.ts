@@ -33,7 +33,7 @@ const getAllPosts = asyncHandler(
       })
       .skip((pageNumber - 1) * postsPerPage)
       .limit(postsPerPage);
-    res.status(200).json(posts);
+    res.status(200).json({ success: true, data: posts });
     return;
   },
 );
@@ -57,7 +57,7 @@ const getPostById = asyncHandler(
           },
         ],
       });
-    res.status(200).json(posts);
+    res.status(200).json({ success: true, data: posts });
     return;
   },
 );
@@ -67,9 +67,10 @@ const createPost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateCreatePost(req.body);
     if (!success) {
-      res
-        .status(400)
-        .json({ message: error.issues[0]?.message || "Invalid Input" });
+      res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || "Invalid Input",
+      });
       return;
     }
     const newPost = new Post({
@@ -81,7 +82,7 @@ const createPost = asyncHandler(
     });
     const finalPost = await newPost.save();
     await finalPost.populate("user", ["_id", "username"]);
-    res.status(201).json(finalPost);
+    res.status(201).json({ success: true, data: finalPost });
     return;
   },
 );
@@ -91,9 +92,10 @@ const updatePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateUpdatePost(req.body);
     if (!success) {
-      res
-        .status(400)
-        .json({ message: error.issues[0]?.message || "Invalid Input" });
+      res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || "Invalid Input",
+      });
       return;
     }
     const updatedPost = await Post.findByIdAndUpdate(
@@ -109,10 +111,10 @@ const updatePost = asyncHandler(
       { new: true, runValidators: true },
     );
     if (updatedPost) {
-      res.status(200).json(updatedPost);
+      res.status(200).json({ success: true, data: updatedPost });
       return;
     } else {
-      res.status(404).json({ message: "Post was not found" });
+      res.status(404).json({ success: false, message: "Post was not found" });
       return;
     }
   },
@@ -124,9 +126,11 @@ const deletePost = asyncHandler(
     const post = await Post.findById(req.params.postId);
     if (post) {
       await Post.findByIdAndDelete(req.params.postId);
-      res.status(200).json({ message: "Post has been deleted successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "Post has been deleted successfully" });
     } else {
-      res.status(404).json({ message: "Post was not found" });
+      res.status(404).json({ success: false, message: "Post was not found" });
     }
   },
 );
@@ -134,16 +138,19 @@ const deletePost = asyncHandler(
 const uploadPostImage = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     if (!req.file) {
-      res.status(400).json({ message: "No file provided" });
+      res.status(400).json({ success: false, message: "No file provided" });
       return;
     }
 
     const result = await cloudinary.uploader.upload(req.file.path);
     fs.unlinkSync(req.file.path);
     res.status(200).json({
-      message: "Uploaded successfully",
-      url: result.secure_url,
-      publicId: result.public_id,
+      success: true,
+      data: {
+        message: "Uploaded successfully",
+        url: result.secure_url,
+        publicId: result.public_id,
+      },
     });
     return;
   },
@@ -155,12 +162,14 @@ const likePost = asyncHandler(
     const postId = req.params.postId;
     const userId = req.user?.id;
     if (!userId) {
-      res.status(401).json({ message: "You are not logged in" });
+      res
+        .status(401)
+        .json({ success: false, message: "You are not logged in" });
       return;
     }
     const post = await Post.findById(postId);
     if (!post) {
-      res.status(404).json({ message: "Post was not found" });
+      res.status(404).json({ success: false, message: "Post was not found" });
       return;
     }
 
@@ -174,7 +183,7 @@ const likePost = asyncHandler(
       { new: true },
     ).populate("likes", ["_id", "username"]);
 
-    res.status(200).json(updatedPost);
+    res.status(200).json({ success: true, data: updatedPost });
     return;
   },
 );

@@ -15,7 +15,7 @@ const getAllComments = asyncHandler(
     const pageNumber = Number(req.query.pageNumber) || 1;
     const postId = req.params.postId;
     if (!postId || typeof postId !== "string") {
-      res.status(400).json({ message: "Post ID is required" });
+      res.status(400).json({ success: false, message: "Post ID is required" });
       return;
     }
 
@@ -27,7 +27,7 @@ const getAllComments = asyncHandler(
       .skip((pageNumber - 1) * commentsPerPost)
       .limit(commentsPerPost)
       .sort({ createdAt: -1 });
-    res.status(200).json(comments);
+    res.status(200).json({ success: true, data: comments });
     return;
   },
 );
@@ -37,7 +37,7 @@ const createComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const postId = req.params.postId;
     if (!postId || typeof postId !== "string") {
-      res.status(400).json({ message: "Post ID is required" });
+      res.status(400).json({ success: false, message: "Post ID is required" });
       return;
     }
 
@@ -46,9 +46,10 @@ const createComment = asyncHandler(
       text: req.body.text,
     } as any);
     if (!success) {
-      res
-        .status(400)
-        .json({ message: error.issues[0]?.message || "Invalid Input" });
+      res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || "Invalid Input",
+      });
       return;
     }
 
@@ -65,7 +66,7 @@ const createComment = asyncHandler(
       ["_id", "username"],
     );
 
-    res.status(201).json(finalComment);
+    res.status(201).json({ success: true, data: finalComment });
     return;
   },
 );
@@ -75,14 +76,17 @@ const updateComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateUpdateComment(req.body);
     if (!success) {
-      res
-        .status(400)
-        .json({ message: error.issues[0]?.message || "Invalid Input" });
+      res.status(400).json({
+        success: false,
+        message: error.issues[0]?.message || "Invalid Input",
+      });
       return;
     }
     const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
-      res.status(400).json({ message: "Comment ID is required" });
+      res
+        .status(400)
+        .json({ success: false, message: "Comment ID is required" });
       return;
     }
 
@@ -96,7 +100,7 @@ const updateComment = asyncHandler(
       { new: true, runValidators: true },
     ).populate("user", ["_id", "username"]);
 
-    res.status(200).json(updatedComment);
+    res.status(200).json({ success: true, data: updatedComment });
     return;
   },
 );
@@ -106,18 +110,23 @@ const deleteComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
-      res.status(400).json({ message: "Comment ID is required" });
+      res
+        .status(400)
+        .json({ success: false, message: "Comment ID is required" });
       return;
     }
 
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     if (comment) {
       await Comment.findByIdAndDelete(new Types.ObjectId(commentId));
-      res
-        .status(200)
-        .json({ message: "Comment has been deleted successfully" });
+      res.status(200).json({
+        success: true,
+        message: "Comment has been deleted successfully",
+      });
     } else {
-      res.status(404).json({ message: "Comment was not found" });
+      res
+        .status(404)
+        .json({ success: false, message: "Comment was not found" });
     }
   },
 );
@@ -127,7 +136,9 @@ const likeComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
-      res.status(400).json({ message: "Comment ID is required" });
+      res
+        .status(400)
+        .json({ success: false, message: "Comment ID is required" });
       return;
     }
 
@@ -141,7 +152,9 @@ const likeComment = asyncHandler(
 
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     if (!comment) {
-      res.status(404).json({ message: "Comment was not found" });
+      res
+        .status(404)
+        .json({ success: false, message: "Comment was not found" });
       return;
     }
 
@@ -154,7 +167,7 @@ const likeComment = asyncHandler(
       { new: true },
     ).populate("likes", ["_id", "username"]);
 
-    res.status(200).json(updatedComment);
+    res.status(200).json({ success: true, data: updatedComment });
     return;
   },
 );
@@ -165,18 +178,22 @@ const uploadCommentImage = asyncHandler(
     const commentId = req.params.commentId;
 
     if (!commentId || typeof commentId !== "string") {
-      res.status(400).json({ message: "Comment ID is required" });
+      res
+        .status(400)
+        .json({ success: false, message: "Comment ID is required" });
       return;
     }
 
     if (!req.file) {
-      res.status(400).json({ message: "No file provided" });
+      res.status(400).json({ success: false, message: "No file provided" });
       return;
     }
 
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     if (!comment) {
-      res.status(404).json({ message: "Comment was not found" });
+      res
+        .status(404)
+        .json({ success: false, message: "Comment was not found" });
       return;
     }
 
@@ -191,8 +208,11 @@ const uploadCommentImage = asyncHandler(
     fs.unlinkSync(req.file.path);
 
     res.status(200).json({
-      message: "Uploaded comment image successfully",
-      image: comment.image,
+      success: true,
+      data: {
+        message: "Uploaded comment image successfully",
+        image: comment.image,
+      },
     });
     return;
   },

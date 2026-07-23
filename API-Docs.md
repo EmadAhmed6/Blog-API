@@ -11,8 +11,14 @@ The API is deployed locally and can be accessed at:
 `http://localhost:5000`
 
 ### Response Wrapping
-- **Success Responses**: Return the raw resource JSON object or array directly without an envelope structure. The HTTP status code (e.g., `200 OK`, `201 Created`) indicates successful completion.
-- **Error Responses**: Return a standard error JSON object with a single `message` field describing the issue.
+- **Success Responses**: Wrapped in a consistent envelope structure containing a `success` boolean set to `true` and a `data` field holding the returned resource(s) or success metadata. Deletion responses return `success: true` and a direct `message` field.
+  ```json
+  {
+    "success": true,
+    "data": { ... }
+  }
+  ```
+- **Error Responses**: Return a standard error JSON object with a `message` field describing the issue (and optional `success: false`).
   ```json
   {
     "message": "Error details and description go here"
@@ -31,26 +37,27 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | :--- | :--- | :--- | :--- | :---: |
 | 1 | POST | `/auth/register` | Register a new user account | ❌ |
 | 2 | POST | `/auth/login` | Authenticate user and retrieve JWT token | ❌ |
-| 3 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ |
-| 4 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ |
-| 5 | GET | `/users` | Retrieve list of all users | 🔒 |
-| 6 | GET | `/users/:id` | Retrieve detailed profile of a single user by ID | 🔒 |
-| 7 | PUT | `/users/:id` | Update account details (Username, Email, Password) | 🔒 |
-| 8 | POST | `/users/:id/upload` | Upload or update user profile picture | 🔒 |
-| 9 | DELETE | `/users/:id` | Delete user account from the database | 🔒 |
-| 10 | GET | `/posts` | Retrieve all blog posts with paginated comments | 🔒 |
-| 11 | POST | `/posts` | Create a new blog post with metadata | 🔒 |
-| 12 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 |
-| 13 | PUT | `/posts/:postId` | Update title, description, category, or image of a post | 🔒 |
-| 14 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 |
-| 15 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 |
-| 16 | POST | `/posts/upload` | Upload thumbnail/cover image to Cloudinary | 🔒 |
-| 17 | GET | `/posts/:postId/comments` | Retrieve list of comments for a specific post | 🔒 |
-| 18 | POST | `/posts/:postId/comments` | Post a new comment under a specific post | 🔒 |
-| 19 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 |
-| 20 | DELETE | `/posts/:postId/comments/:commentId` | Remove a comment from a post | 🔒 |
-| 21 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike status on a comment | 🔒 |
-| 22 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 |
+| 3 | POST | `/auth/verify-otp` | Verify user email using OTP code | ❌ |
+| 4 | POST | `/auth/forgot-password` | Send password reset link to user's email | ❌ |
+| 5 | POST | `/auth/reset-password/:userId/:token` | Validate reset token and update password | ❌ |
+| 6 | GET | `/users` | Retrieve list of all users | 🔒 |
+| 7 | GET | `/users/:id` | Retrieve detailed profile of a single user by ID | 🔒 |
+| 8 | PUT | `/users/:id` | Update account details (Username, Email, Password) | 🔒 |
+| 9 | POST | `/users/:id/upload` | Upload or update user profile picture | 🔒 |
+| 10 | DELETE | `/users/:id` | Delete user account from the database | 🔒 |
+| 11 | GET | `/posts` | Retrieve all blog posts with paginated comments | 🔒 |
+| 12 | POST | `/posts` | Create a new blog post with metadata | 🔒 |
+| 13 | GET | `/posts/:postId` | Retrieve detailed view of a single post by ID | 🔒 |
+| 14 | PUT | `/posts/:postId` | Update title, description, category, or image of a post | 🔒 |
+| 15 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 |
+| 16 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 |
+| 17 | POST | `/posts/upload` | Upload thumbnail/cover image to Cloudinary | 🔒 |
+| 18 | GET | `/posts/:postId/comments` | Retrieve list of comments for a specific post | 🔒 |
+| 19 | POST | `/posts/:postId/comments` | Post a new comment under a specific post | 🔒 |
+| 20 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 |
+| 21 | DELETE | `/posts/:postId/comments/:commentId` | Remove a comment from a post | 🔒 |
+| 22 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike status on a comment | 🔒 |
+| 23 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 |
 
 ---
 
@@ -82,17 +89,21 @@ Register a new user account on the platform.
 User registered successfully. Returns user details along with an auto-generated JWT token.
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "username": "ahmed",
-  "email": "ahmed@example.com",
-  "isAdmin": false,
-  "profilePicture": {
-    "url": "",
-    "publicId": null
-  },
-  "createdAt": "2026-07-20T18:27:31.000Z",
-  "updatedAt": "2026-07-20T18:27:31.000Z"
+  "success": true,
+  "data": {
+    "message": "Registered Successfully, Check your email for verification code",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "username": "ahmed",
+    "email": "ahmed@example.com",
+    "isAdmin": false,
+    "profilePicture": {
+      "url": "",
+      "publicId": null
+    },
+    "createdAt": "2026-07-20T18:27:31.000Z",
+    "updatedAt": "2026-07-20T18:27:31.000Z"
+  }
 }
 ```
 
@@ -121,17 +132,20 @@ Log in an existing user and retrieve their JWT session token.
 Login successful. Returns user account details and the authorization token.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "username": "ahmed",
-  "email": "ahmed@example.com",
-  "isAdmin": false,
-  "profilePicture": {
-    "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
-    "publicId": "profile_picture_123"
-  },
-  "createdAt": "2026-07-20T18:27:31.000Z",
-  "updatedAt": "2026-07-20T18:27:31.000Z",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "username": "ahmed",
+    "email": "ahmed@example.com",
+    "isAdmin": false,
+    "profilePicture": {
+      "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
+      "publicId": "profile_picture_123"
+    },
+    "createdAt": "2026-07-20T18:27:31.000Z",
+    "updatedAt": "2026-07-20T18:27:31.000Z",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
 }
 ```
 
@@ -140,6 +154,58 @@ Invalid email/password, or Zod validation failed.
 ```json
 {
   "message": "Invalid email or password"
+}
+```
+
+---
+
+### POST /auth/verify-otp
+Verify the user's email address using the 6-digit OTP code sent during registration.
+
+#### Request Body
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `email` | string | ✅ | The registered email address to verify. |
+| `otp` | number | ✅ | The 6-digit verification code. |
+
+#### Responses
+
+##### Response 200
+Account verified successfully. Returns user account details.
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Account verified successfully",
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "username": "ahmed",
+    "email": "ahmed@example.com",
+    "isAdmin": false,
+    "profilePicture": {
+      "url": "",
+      "publicId": null
+    },
+    "createdAt": "2026-07-20T18:27:31.000Z",
+    "updatedAt": "2026-07-20T18:27:31.000Z"
+  }
+}
+```
+
+##### Response 400
+Invalid or expired OTP token.
+```json
+{
+  "success": false,
+  "message": "Invalid or expired token"
+}
+```
+
+##### Response 404
+Email was not found.
+```json
+{
+  "success": false,
+  "message": "Email was not found"
 }
 ```
 
@@ -159,7 +225,10 @@ Send a secure temporary password reset URL link to the user's registered email a
 Password reset email dispatched successfully.
 ```json
 {
-  "message": "Password reset link sent successfully to your email"
+  "success": true,
+  "data": {
+    "message": "Password reset link sent successfully to your email"
+  }
 }
 ```
 
@@ -194,7 +263,9 @@ Verify the reset token in the URL parameters and change the user's password.
 Password updated successfully.
 ```json
 {
-  "message": "Password updated successfully"
+  "data": {
+    "message": "Password updated successfully"
+  }
 }
 ```
 
@@ -226,20 +297,23 @@ Retrieve a list of all registered users on the system.
 ##### Response 200
 Successfully retrieved users list.
 ```json
-[
-  {
-    "_id": "65f1a2b3c4d5e6f789012345",
-    "username": "Ahmed",
-    "email": "ahmed@example.com",
-    "isAdmin": false,
-    "profilePicture": {
-      "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
-      "publicId": "profile_picture_123"
-    },
-    "createdAt": "2026-07-20T18:27:31.000Z",
-    "updatedAt": "2026-07-20T18:27:31.000Z"
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "65f1a2b3c4d5e6f789012345",
+      "username": "Ahmed",
+      "email": "ahmed@example.com",
+      "isAdmin": false,
+      "profilePicture": {
+        "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
+        "publicId": "profile_picture_123"
+      },
+      "createdAt": "2026-07-20T18:27:31.000Z",
+      "updatedAt": "2026-07-20T18:27:31.000Z"
+    }
+  ]
+}
 ```
 
 ##### Response 401
@@ -266,16 +340,19 @@ Retrieve profile information of a single user by their database ID.
 Successfully retrieved user details.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "username": "Ahmed",
-  "email": "ahmed@example.com",
-  "isAdmin": false,
-  "profilePicture": {
-    "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
-    "publicId": "profile_picture_123"
-  },
-  "createdAt": "2026-07-20T18:27:31.000Z",
-  "updatedAt": "2026-07-20T18:27:31.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "username": "Ahmed",
+    "email": "ahmed@example.com",
+    "isAdmin": false,
+    "profilePicture": {
+      "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
+      "publicId": "profile_picture_123"
+    },
+    "createdAt": "2026-07-20T18:27:31.000Z",
+    "updatedAt": "2026-07-20T18:27:31.000Z"
+  }
 }
 ```
 
@@ -318,16 +395,19 @@ Update user profile information (Username, Email, or Password). Access is restri
 Profile updated successfully. Returns updated user document.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "username": "AhmedUpdated",
-  "email": "ahmed.new@example.com",
-  "isAdmin": false,
-  "profilePicture": {
-    "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
-    "publicId": "profile_picture_123"
-  },
-  "createdAt": "2026-07-20T18:27:31.000Z",
-  "updatedAt": "2026-07-20T21:27:00.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "username": "AhmedUpdated",
+    "email": "ahmed.new@example.com",
+    "isAdmin": false,
+    "profilePicture": {
+      "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
+      "publicId": "profile_picture_123"
+    },
+    "createdAt": "2026-07-20T18:27:31.000Z",
+    "updatedAt": "2026-07-20T21:27:00.000Z"
+  }
 }
 ```
 
@@ -384,16 +464,19 @@ Upload and change user profile picture. Restricts access to account owner or Adm
 Image uploaded and user profile picture updated successfully.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "username": "Ahmed",
-  "email": "ahmed@example.com",
-  "isAdmin": false,
-  "profilePicture": {
-    "url": "https://res.cloudinary.com/example/image/upload/new_profile.jpg",
-    "publicId": "profile_picture_567"
-  },
-  "createdAt": "2026-07-20T18:27:31.000Z",
-  "updatedAt": "2026-07-20T21:27:10.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "username": "Ahmed",
+    "email": "ahmed@example.com",
+    "isAdmin": false,
+    "profilePicture": {
+      "url": "https://res.cloudinary.com/example/image/upload/new_profile.jpg",
+      "publicId": "profile_picture_567"
+    },
+    "createdAt": "2026-07-20T18:27:31.000Z",
+    "updatedAt": "2026-07-20T21:27:10.000Z"
+  }
 }
 ```
 
@@ -445,6 +528,7 @@ Delete a user from the database. **Admin-only endpoint.**
 User deleted successfully.
 ```json
 {
+  "success": true,
   "message": "User deleted successfully"
 }
 ```
@@ -490,31 +574,34 @@ Retrieve a paginated list of blog posts. Populates comments and authors.
 ##### Response 200
 List of posts returned successfully.
 ```json
-[
-  {
-    "_id": "65f1a2b3c4d5e6f789012345",
-    "title": "My First Blog Post",
-    "description": "This is my first blog post description.",
-    "category": "Technology",
-    "user": {
-      "_id": "65f1a2b3c4d5e6f789012347",
-      "username": "Ahmed"
-    },
-    "image": {
-      "url": "https://example.com/image.jpg",
-      "publicId": "blog_image_123"
-    },
-    "likes": [
-      {
-        "_id": "65f1a2b3c4d5e6f789012348",
-        "username": "Sara"
-      }
-    ],
-    "comments": [],
-    "createdAt": "2026-07-20T18:27:29.000Z",
-    "updatedAt": "2026-07-20T18:27:29.000Z"
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "65f1a2b3c4d5e6f789012345",
+      "title": "My First Blog Post",
+      "description": "This is my first blog post description.",
+      "category": "Technology",
+      "user": {
+        "_id": "65f1a2b3c4d5e6f789012347",
+        "username": "Ahmed"
+      },
+      "image": {
+        "url": "https://example.com/image.jpg",
+        "publicId": "blog_image_123"
+      },
+      "likes": [
+        {
+          "_id": "65f1a2b3c4d5e6f789012348",
+          "username": "Sara"
+        }
+      ],
+      "comments": [],
+      "createdAt": "2026-07-20T18:27:29.000Z",
+      "updatedAt": "2026-07-20T18:27:29.000Z"
+    }
+  ]
+}
 ```
 
 ##### Response 401
@@ -544,22 +631,25 @@ Create a new blog post.
 Post created successfully. Returns the populated post resource.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "title": "My First Blog Post",
-  "description": "This is my first blog post description.",
-  "category": "Technology",
-  "user": {
-    "_id": "65f1a2b3c4d5e6f789012347",
-    "username": "Ahmed"
-  },
-  "image": {
-    "url": "",
-    "publicId": null
-  },
-  "likes": [],
-  "comments": [],
-  "createdAt": "2026-07-20T18:27:29.000Z",
-  "updatedAt": "2026-07-20T18:27:29.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "title": "My First Blog Post",
+    "description": "This is my first blog post description.",
+    "category": "Technology",
+    "user": {
+      "_id": "65f1a2b3c4d5e6f789012347",
+      "username": "Ahmed"
+    },
+    "image": {
+      "url": "",
+      "publicId": null
+    },
+    "likes": [],
+    "comments": [],
+    "createdAt": "2026-07-20T18:27:29.000Z",
+    "updatedAt": "2026-07-20T18:27:29.000Z"
+  }
 }
 ```
 
@@ -595,22 +685,25 @@ Retrieve a single post details with all associated populated child structures.
 Post retrieved successfully.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "title": "My First Blog Post",
-  "description": "This is my first blog post description.",
-  "category": "Technology",
-  "user": {
-    "_id": "65f1a2b3c4d5e6f789012347",
-    "username": "Ahmed"
-  },
-  "image": {
-    "url": "https://example.com/image.jpg",
-    "publicId": "blog_image_123"
-  },
-  "likes": [],
-  "comments": [],
-  "createdAt": "2026-07-20T18:27:29.000Z",
-  "updatedAt": "2026-07-20T18:27:29.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "title": "My First Blog Post",
+    "description": "This is my first blog post description.",
+    "category": "Technology",
+    "user": {
+      "_id": "65f1a2b3c4d5e6f789012347",
+      "username": "Ahmed"
+    },
+    "image": {
+      "url": "https://example.com/image.jpg",
+      "publicId": "blog_image_123"
+    },
+    "likes": [],
+    "comments": [],
+    "createdAt": "2026-07-20T18:27:29.000Z",
+    "updatedAt": "2026-07-20T18:27:29.000Z"
+  }
 }
 ```
 
@@ -654,18 +747,21 @@ Update post parameters. Access is allowed only to the post author owner or Admin
 Post updated successfully. Returns updated post document.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "title": "Updated Blog Post Title",
-  "description": "This is my updated blog post description content.",
-  "category": "Programming",
-  "user": "65f1a2b3c4d5e6f789012347",
-  "image": {
-    "url": "https://example.com/image.jpg",
-    "publicId": "blog_image_123"
-  },
-  "likes": [],
-  "createdAt": "2026-07-20T18:27:29.000Z",
-  "updatedAt": "2026-07-20T21:28:00.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "title": "Updated Blog Post Title",
+    "description": "This is my updated blog post description content.",
+    "category": "Programming",
+    "user": "65f1a2b3c4d5e6f789012347",
+    "image": {
+      "url": "https://example.com/image.jpg",
+      "publicId": "blog_image_123"
+    },
+    "likes": [],
+    "createdAt": "2026-07-20T18:27:29.000Z",
+    "updatedAt": "2026-07-20T21:28:00.000Z"
+  }
 }
 ```
 
@@ -717,6 +813,7 @@ Delete a blog post and remove its media assets. Restricted to the post owner or 
 Post deleted successfully.
 ```json
 {
+  "success": true,
   "message": "Post has been deleted successfully"
 }
 ```
@@ -761,23 +858,26 @@ Toggle a user's like/unlike status on a specific post.
 Post liked status updated. Returns the updated post object showing the new likes array.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012345",
-  "title": "My First Blog Post",
-  "description": "This is my first blog post description.",
-  "category": "Technology",
-  "user": "65f1a2b3c4d5e6f789012347",
-  "image": {
-    "url": "https://example.com/image.jpg",
-    "publicId": "blog_image_123"
-  },
-  "likes": [
-    {
-      "_id": "65f1a2b3c4d5e6f789012347",
-      "username": "Ahmed"
-    }
-  ],
-  "createdAt": "2026-07-20T18:27:29.000Z",
-  "updatedAt": "2026-07-20T21:28:10.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012345",
+    "title": "My First Blog Post",
+    "description": "This is my first blog post description.",
+    "category": "Technology",
+    "user": "65f1a2b3c4d5e6f789012347",
+    "image": {
+      "url": "https://example.com/image.jpg",
+      "publicId": "blog_image_123"
+    },
+    "likes": [
+      {
+        "_id": "65f1a2b3c4d5e6f789012347",
+        "username": "Ahmed"
+      }
+    ],
+    "createdAt": "2026-07-20T18:27:29.000Z",
+    "updatedAt": "2026-07-20T21:28:10.000Z"
+  }
 }
 ```
 
@@ -813,9 +913,12 @@ Upload an image to Cloudinary to be used as a post thumbnail or cover. Multipart
 Image uploaded successfully. Returns URL and public identifier path parameters.
 ```json
 {
-  "message": "Uploaded successfully",
-  "url": "https://res.cloudinary.com/example/image/upload/post_thumbnail.jpg",
-  "publicId": "post_thumbnail_987"
+  "success": true,
+  "data": {
+    "message": "Uploaded successfully",
+    "url": "https://res.cloudinary.com/example/image/upload/post_thumbnail.jpg",
+    "publicId": "post_thumbnail_987"
+  }
 }
 ```
 
@@ -858,24 +961,27 @@ Retrieve a paginated list of comments associated with a specific blog post.
 ##### Response 200
 Comments retrieved successfully.
 ```json
-[
-  {
-    "_id": "65f1a2b3c4d5e6f789012346",
-    "postId": "65f1a2b3c4d5e6f789012345",
-    "text": "This is a great post!",
-    "user": {
-      "_id": "65f1a2b3c4d5e6f789012347",
-      "username": "Ahmed"
-    },
-    "image": {
-      "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
-      "publicId": "comment_image_123"
-    },
-    "likes": [],
-    "createdAt": "2026-07-20T18:27:27.000Z",
-    "updatedAt": "2026-07-20T18:27:27.000Z"
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "65f1a2b3c4d5e6f789012346",
+      "postId": "65f1a2b3c4d5e6f789012345",
+      "text": "This is a great post!",
+      "user": {
+        "_id": "65f1a2b3c4d5e6f789012347",
+        "username": "Ahmed"
+      },
+      "image": {
+        "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
+        "publicId": "comment_image_123"
+      },
+      "likes": [],
+      "createdAt": "2026-07-20T18:27:27.000Z",
+      "updatedAt": "2026-07-20T18:27:27.000Z"
+    }
+  ]
+}
 ```
 
 ##### Response 400
@@ -915,20 +1021,23 @@ Create and post a new comment under a specific post.
 Comment created successfully. Returns the populated comment payload.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012346",
-  "postId": "65f1a2b3c4d5e6f789012345",
-  "text": "This is a great post!",
-  "user": {
-    "_id": "65f1a2b3c4d5e6f789012347",
-    "username": "Ahmed"
-  },
-  "image": {
-    "url": "",
-    "publicId": null
-  },
-  "likes": [],
-  "createdAt": "2026-07-20T18:27:27.000Z",
-  "updatedAt": "2026-07-20T18:27:27.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012346",
+    "postId": "65f1a2b3c4d5e6f789012345",
+    "text": "This is a great post!",
+    "user": {
+      "_id": "65f1a2b3c4d5e6f789012347",
+      "username": "Ahmed"
+    },
+    "image": {
+      "url": "",
+      "publicId": null
+    },
+    "likes": [],
+    "createdAt": "2026-07-20T18:27:27.000Z",
+    "updatedAt": "2026-07-20T18:27:27.000Z"
+  }
 }
 ```
 
@@ -970,20 +1079,23 @@ Update the text body of an existing comment. Access restricted to comment author
 Comment text updated successfully.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012346",
-  "postId": "65f1a2b3c4d5e6f789012345",
-  "text": "Updated comment text details",
-  "user": {
-    "_id": "65f1a2b3c4d5e6f789012347",
-    "username": "Ahmed"
-  },
-  "image": {
-    "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
-    "publicId": "comment_image_123"
-  },
-  "likes": [],
-  "createdAt": "2026-07-20T18:27:27.000Z",
-  "updatedAt": "2026-07-20T21:28:30.000Z"
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012346",
+    "postId": "65f1a2b3c4d5e6f789012345",
+    "text": "Updated comment text details",
+    "user": {
+      "_id": "65f1a2b3c4d5e6f789012347",
+      "username": "Ahmed"
+    },
+    "image": {
+      "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
+      "publicId": "comment_image_123"
+    },
+    "likes": [],
+    "createdAt": "2026-07-20T18:27:27.000Z",
+    "updatedAt": "2026-07-20T21:28:30.000Z"
+  }
 }
 ```
 
@@ -1036,6 +1148,7 @@ Remove a comment. Access restricted to comment owner or Admins.
 Comment deleted successfully.
 ```json
 {
+  "success": true,
   "message": "Comment has been deleted successfully"
 }
 ```
@@ -1089,25 +1202,28 @@ Toggle user's like/unlike status on a specific comment.
 Comment like status updated successfully.
 ```json
 {
-  "_id": "65f1a2b3c4d5e6f789012346",
-  "postId": "65f1a2b3c4d5e6f789012345",
-  "text": "This is a great post!",
-  "user": {
-    "_id": "65f1a2b3c4d5e6f789012347",
-    "username": "Ahmed"
-  },
-  "image": {
-    "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
-    "publicId": "comment_image_123"
-  },
-  "likes": [
-    {
+  "success": true,
+  "data": {
+    "_id": "65f1a2b3c4d5e6f789012346",
+    "postId": "65f1a2b3c4d5e6f789012345",
+    "text": "This is a great post!",
+    "user": {
       "_id": "65f1a2b3c4d5e6f789012347",
       "username": "Ahmed"
-    }
-  ],
-  "createdAt": "2026-07-20T18:27:27.000Z",
-  "updatedAt": "2026-07-20T21:28:40.000Z"
+    },
+    "image": {
+      "url": "https://res.cloudinary.com/example/image/upload/comment.jpg",
+      "publicId": "comment_image_123"
+    },
+    "likes": [
+      {
+        "_id": "65f1a2b3c4d5e6f789012347",
+        "username": "Ahmed"
+      }
+    ],
+    "createdAt": "2026-07-20T18:27:27.000Z",
+    "updatedAt": "2026-07-20T21:28:40.000Z"
+  }
 }
 ```
 
@@ -1149,10 +1265,13 @@ Upload an image to attach to a comment. Restricted to the comment owner or Admin
 Comment image uploaded successfully.
 ```json
 {
-  "message": "Uploaded comment image successfully",
-  "image": {
-    "url": "https://res.cloudinary.com/example/image/upload/comment_attachment.jpg",
-    "publicId": "comment_image_789"
+  "success": true,
+  "data": {
+    "message": "Uploaded comment image successfully",
+    "image": {
+      "url": "https://res.cloudinary.com/example/image/upload/comment_attachment.jpg",
+      "publicId": "comment_image_789"
+    }
   }
 }
 ```

@@ -46,7 +46,9 @@ This project implements JSON Web Tokens (JWT) for secure authentication, role-ba
 ## ✨ Key Features
 
 - 🔐 **Secure User Authentication & Access Control**
-  - Registration & login with auto-generated JWT tokens.
+  - Registration with automatic OTP code dispatch for email verification.
+  - Secure verification step to validate account email addresses using one-time passwords (OTP).
+  - User login with auto-generated JWT tokens.
   - Bulletproof password hashing using `bcryptjs` with 10 salt rounds.
   - Complete password reset request pipeline using signed tokens and email delivery (`nodemailer`).
   - Hierarchical authorization middlewares (`verifyToken`, `verifyAuthorizedToken`, `verifyAdminToken`).
@@ -241,6 +243,7 @@ All routes are mounted directly on their respective categories without extra pre
 | :--- | :--- | :--- | :--- |
 | `POST` | `/auth/register` | Public | Registers a new User. |
 | `POST` | `/auth/login` | Public | Logs in a User and returns a JWT token. |
+| `POST` | `/auth/verify-otp` | Public | Verifies user's email address using OTP code. |
 | `POST` | `/auth/forgot-password` | Public | Sends a secure password reset link to user's email. |
 | `POST` | `/auth/reset-password/:userId/:token` | Public | Validates token and resets user password. |
 
