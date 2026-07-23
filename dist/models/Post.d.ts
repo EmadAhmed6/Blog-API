@@ -3,6 +3,8 @@ import { type ICreatePost, type IUpdatePost } from "../schemas/post.js";
 interface IPost extends ICreatePost, Document {
     user: Types.ObjectId;
     likes: Types.ObjectId[];
+    sharedPost: Types.ObjectId;
+    sharesCount: Number;
 }
 declare const validateCreatePost: (post: Omit<IPost, "user" | "likes">) => import("zod").ZodSafeParseResult<{
     title: string;

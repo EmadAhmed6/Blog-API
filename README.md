@@ -44,78 +44,85 @@ This project implements JSON Web Tokens (JWT) for secure authentication, role-ba
 ---
 
 ## ✨ Key Features
-
-- 🔐 **Secure User Authentication & Access Control**
-  - Registration with automatic OTP code dispatch for email verification.
-  - Secure verification step to validate account email addresses using one-time passwords (OTP).
-  - User login with auto-generated JWT tokens.
-  - Bulletproof password hashing using `bcryptjs` with 10 salt rounds.
-  - Complete password reset request pipeline using signed tokens and email delivery (`nodemailer`).
-  - Hierarchical authorization middlewares (`verifyToken`, `verifyAuthorizedToken`, `verifyAdminToken`).
-- 📝 **Advanced Post Management**
-  - Full CRUD capabilities for creating, reading, updating, and deleting posts.
-  - Dynamic image uploads (thumbnail/cover) to Cloudinary via Express middleware using `multer`.
-  - Social interactions: Post like/unlike toggling with user tracker associations.
-- 💬 **Flexible Commenting & Feedback System**
-  - Embedded commenting functionality linked dynamically to posts.
-  - Media support for comments with dedicated Cloudinary image uploads.
-  - Social interactions: Comment like/unlike tracking.
-- 🛡️ **Data Integrity & Validation**
-  - Strict input sanitation and schema constraints using Joi.
-  - Real-time validation for requests (body parameters, credentials, structure).
-- 🚀 **RESTful Design Patterns**
-  - Logical API response formats returning consistent, pure JSON structures.
-  - Global middleware-based error handling & 404 handler.
-  - TypeScript-safe request and response payload typing.
-
----
-
-## 📊 Database Entity-Relationship (ER) Diagram
-
-The diagram below outlines the schema relations and virtual links of the database:
-
-```mermaid
-erDiagram
-    USER ||--o{ POST : "creates"
-    USER ||--o{ COMMENT : "writes"
-    POST ||--o{ COMMENT : "contains"
-    USER ||--o{ POST : "likes"
-    USER ||--o{ COMMENT : "likes"
-
-    USER {
-        ObjectId id PK
-        string username
-        string email
-        string password
-        object profilePicture
-        boolean isAdmin
-        datetime createdAt
-        datetime updatedAt
-    }
-
-    POST {
-        ObjectId id PK
-        string title
-        string description
-        ObjectId user FK
-        string category
-        object image
-        ObjectId[] likes FK
-        datetime createdAt
-        datetime updatedAt
-    }
-
-    COMMENT {
-        ObjectId id PK
-        ObjectId postId FK
-        ObjectId user FK
-        string text
-        object image
-        ObjectId[] likes FK
-        datetime createdAt
-        datetime updatedAt
-    }
-```
+ 
+ - 🔐 **Secure User Authentication & Access Control**
+   - Registration with automatic OTP code dispatch for email verification.
+   - Secure verification step to validate account email addresses using one-time passwords (OTP).
+   - User login with auto-generated JWT tokens.
+   - Bulletproof password hashing using `bcryptjs` with 10 salt rounds.
+   - Complete password reset request pipeline using signed tokens and email delivery (`nodemailer`).
+   - Hierarchical authorization middlewares (`verifyToken`, `verifyAuthorizedToken`, `verifyAdminToken`).
+ - 📝 **Advanced Post Management**
+   - Full CRUD capabilities for creating, reading, updating, and deleting posts.
+   - Dynamic image uploads (thumbnail/cover) to Cloudinary via Express middleware using `multer`.
+   - Post sharing: Create shared posts referencing original posts and tracking shares.
+   - Social interactions: Post like/unlike toggling with automatic likes counter tracking.
+ - 💬 **Flexible Commenting & Feedback System**
+   - Embedded commenting functionality linked dynamically to posts.
+   - Media support for comments with dedicated Cloudinary image uploads.
+   - Social interactions: Comment like/unlike tracking.
+ - 🛡️ **Data Integrity & Validation**
+   - Strict input sanitation and schema constraints using Joi.
+   - Real-time validation for requests (body parameters, credentials, structure).
+ - 🚀 **RESTful Design Patterns**
+   - Logical API response formats returning consistent, pure JSON structures.
+   - Global middleware-based error handling & 404 handler.
+   - TypeScript-safe request and response payload typing.
+ 
+ ---
+ 
+ ## 📊 Database Entity-Relationship (ER) Diagram
+ 
+ The diagram below outlines the schema relations and virtual links of the database:
+ 
+ ```mermaid
+ erDiagram
+     USER ||--o{ POST : "creates"
+     USER ||--o{ COMMENT : "writes"
+     POST ||--o{ COMMENT : "contains"
+     USER ||--o{ POST : "likes"
+     USER ||--o{ COMMENT : "likes"
+ 
+     USER {
+         ObjectId id PK
+         string username
+         string email
+         string password
+         object profilePicture
+         boolean isAdmin
+         number postsCount
+         boolean isVerified
+         datetime createdAt
+         datetime updatedAt
+     }
+ 
+     POST {
+         ObjectId id PK
+         string title
+         string description
+         ObjectId user FK
+         string category
+         object image
+         ObjectId[] likes FK
+         ObjectId sharedPost FK
+         number sharesCount
+         number likesCount
+         number commentsCount
+         datetime createdAt
+         datetime updatedAt
+     }
+ 
+     COMMENT {
+         ObjectId id PK
+         ObjectId postId FK
+         ObjectId user FK
+         string text
+         object image
+         ObjectId[] likes FK
+         datetime createdAt
+         datetime updatedAt
+     }
+ ```
 
 ---
 

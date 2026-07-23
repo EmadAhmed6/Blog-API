@@ -2,7 +2,6 @@ import express, {} from "express";
 import fs from "fs";
 import asyncHandler from "express-async-handler";
 import { Comment, validateCreateComment, validateUpdateComment, } from "../models/Comment.js";
-import { User } from "../models/User.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Types } from "mongoose";
 // get All Comments
@@ -10,24 +9,24 @@ const getAllComments = asyncHandler(async (req, res) => {
     const pageNumber = Number(req.query.pageNumber) || 1;
     const postId = req.params.postId;
     if (!postId || typeof postId !== "string") {
-        res.status(400).json({ message: "Post ID is required" });
+        res.status(400).json({ success: false, message: "Post ID is required" });
         return;
     }
     const commentsPerPost = Number(req.query.commentsPerPost) || 5;
     const comments = await Comment.find({ postId: new Types.ObjectId(postId) })
-        .populate("user", "username")
-        .populate("likes", "username")
+        .populate("user", ["_id", "username"])
+        .populate("likes", ["_id", "username"])
         .skip((pageNumber - 1) * commentsPerPost)
         .limit(commentsPerPost)
         .sort({ createdAt: -1 });
-    res.status(200).json(comments);
+    res.status(200).json({ success: true, data: comments });
     return;
 });
 // Create Comment
 const createComment = asyncHandler(async (req, res) => {
     const postId = req.params.postId;
     if (!postId || typeof postId !== "string") {
-        res.status(400).json({ message: "Post ID is required" });
+        res.status(400).json({ success: false, message: "Post ID is required" });
         return;
     }
     const { error, success } = validateCreateComment({
@@ -35,9 +34,10 @@ const createComment = asyncHandler(async (req, res) => {
         text: req.body.text,
     });
     if (!success) {
-        res
-            .status(400)
-            .json({ message: error.issues[0]?.message || "Invalid Input" });
+        res.status(400).json({
+            success: false,
+            message: error.issues[0]?.message || "Invalid Input",
+        });
         return;
     }
     const newComment = new Comment({
@@ -46,55 +46,65 @@ const createComment = asyncHandler(async (req, res) => {
         user: req.user.id,
     });
     await newComment.save();
-    const finalComment = await Comment.findById(newComment._id).populate("user", "username");
-    res.status(201).json(finalComment);
+    const finalComment = await Comment.findById(newComment._id).populate("user", ["_id", "username"]);
+    res.status(201).json({ success: true, data: finalComment });
     return;
 });
 // Update Comment
 const updateComment = asyncHandler(async (req, res) => {
     const { error, success } = validateUpdateComment(req.body);
     if (!success) {
-        res
-            .status(400)
-            .json({ message: error.issues[0]?.message || "Invalid Input" });
+        res.status(400).json({
+            success: false,
+            message: error.issues[0]?.message || "Invalid Input",
+        });
         return;
     }
     const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
-        res.status(400).json({ message: "Comment ID is required" });
+        res
+            .status(400)
+            .json({ success: false, message: "Comment ID is required" });
         return;
     }
     const updatedComment = await Comment.findByIdAndUpdate(new Types.ObjectId(commentId), {
         $set: {
             text: req.body.text,
         },
-    }, { new: true, runValidators: true }).populate("user", "username");
-    res.status(200).json(updatedComment);
+    }, { new: true, runValidators: true }).populate("user", ["_id", "username"]);
+    res.status(200).json({ success: true, data: updatedComment });
     return;
 });
 // Delete Comment
 const deleteComment = asyncHandler(async (req, res) => {
     const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
-        res.status(400).json({ message: "Comment ID is required" });
+        res
+            .status(400)
+            .json({ success: false, message: "Comment ID is required" });
         return;
     }
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     if (comment) {
         await Comment.findByIdAndDelete(new Types.ObjectId(commentId));
-        res
-            .status(200)
-            .json({ message: "Comment has been deleted successfully" });
+        res.status(200).json({
+            success: true,
+            message: "Comment has been deleted successfully",
+        });
     }
     else {
-        res.status(404).json({ message: "Comment was not found" });
+        res
+            .status(404)
+            .json({ success: false, message: "Comment was not found" });
     }
 });
 // Like Comment
 const likeComment = asyncHandler(async (req, res) => {
     const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
-        res.status(400).json({ message: "Comment ID is required" });
+        res
+            .status(400)
+            .json({ success: false, message: "Comment ID is required" });
         return;
     }
     const userId = req.user?.id;
@@ -106,31 +116,34 @@ const likeComment = asyncHandler(async (req, res) => {
     }
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     if (!comment) {
-        res.status(404).json({ message: "Comment was not found" });
+        res
+            .status(404)
+            .json({ success: false, message: "Comment was not found" });
         return;
     }
-    const isLiked = (comment.likes || []).some((likeId) => likeId.toString() === userId);
-    const userObjectId = new Types.ObjectId(userId);
-    const updatedComment = await Comment.findByIdAndUpdate(new Types.ObjectId(commentId), isLiked
-        ? { $pull: { likes: userObjectId } }
-        : { $push: { likes: userObjectId } }, { new: true }).populate("likes", "username");
-    res.status(200).json(updatedComment);
+    const isLiked = comment.likes.some((likeId) => likeId.toString() === userId);
+    const updatedComment = await Comment.findByIdAndUpdate(new Types.ObjectId(commentId), isLiked ? { $pull: { likes: userId } } : { $push: { likes: userId } }, { new: true }).populate("likes", ["_id", "username"]);
+    res.status(200).json({ success: true, data: updatedComment });
     return;
 });
 // Upload Comment Image
 const uploadCommentImage = asyncHandler(async (req, res) => {
     const commentId = req.params.commentId;
     if (!commentId || typeof commentId !== "string") {
-        res.status(400).json({ message: "Comment ID is required" });
+        res
+            .status(400)
+            .json({ success: false, message: "Comment ID is required" });
         return;
     }
     if (!req.file) {
-        res.status(400).json({ message: "No file provided" });
+        res.status(400).json({ success: false, message: "No file provided" });
         return;
     }
     const comment = await Comment.findById(new Types.ObjectId(commentId));
     if (!comment) {
-        res.status(404).json({ message: "Comment was not found" });
+        res
+            .status(404)
+            .json({ success: false, message: "Comment was not found" });
         return;
     }
     const result = await cloudinary.uploader.upload(req.file.path);
@@ -141,8 +154,11 @@ const uploadCommentImage = asyncHandler(async (req, res) => {
     await comment.save();
     fs.unlinkSync(req.file.path);
     res.status(200).json({
-        message: "Uploaded comment image successfully",
-        image: comment.image,
+        success: true,
+        data: {
+            message: "Uploaded comment image successfully",
+            image: comment.image,
+        },
     });
     return;
 });

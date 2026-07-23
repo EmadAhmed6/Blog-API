@@ -40,6 +40,15 @@ const PostSchema = new Schema({
             ref: "User",
         },
     ],
+    sharedPost: {
+        type: Schema.Types.ObjectId,
+        ref: "Post",
+        default: null,
+    },
+    sharesCount: {
+        type: Number,
+        default: 0,
+    },
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

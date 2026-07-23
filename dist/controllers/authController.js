@@ -3,8 +3,24 @@ import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import { validateRegisterUser, User, validateLoginUser, validateResetPassword, validateForgotPassword, } from "../models/User.js";
+import { validateRegisterUser, User, validateLoginUser, validateResetPassword, validateForgotPassword, validateVerifyOtp, } from "../models/User.js";
+const sendEmail = async (to, subject, html) => {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.USER_EMAIL,
+            pass: process.env.USER_PASS,
+        },
+    });
+    await transporter.sendMail({
+        from: process.env.USER_EMAIL,
+        to,
+        subject,
+        html,
+    });
+};
 // Register User
+let otpStore = {};
 const register = asyncHandler(async (req, res) => {
     const { error, success } = validateRegisterUser(req.body);
     if (!success) {
@@ -15,7 +31,9 @@ const register = asyncHandler(async (req, res) => {
     }
     const user = await User.findOne({ email: req.body.email });
     if (user) {
-        res.status(400).json({ message: "Email is already exist" });
+        res
+            .status(400)
+            .json({ success: false, message: "Email is already exist" });
         return;
     }
     const genSalt = await bcrypt.genSalt(10);
@@ -24,11 +42,54 @@ const register = asyncHandler(async (req, res) => {
         username: req.body.username,
         email: req.body.email,
         password: req.body.password,
+        isVerified: false,
     });
     const finalUser = await newUser.save();
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    otpStore[finalUser.email] = otp;
+    await sendEmail(finalUser.email, "Verify Your Email", `<div>
+        <h3>Welcome ${finalUser.username}</h3>
+        <p>Your Verification Code is: <b>${otp}</b></p>
+      </div>`);
     const token = finalUser.generateToken();
     const { password, ...others } = finalUser.toObject();
-    res.status(200).json({ token, ...others });
+    res.status(200).json({
+        success: true,
+        data: {
+            message: "Registered Successfully, Check your email for verification code",
+            token,
+            ...others,
+        },
+    });
+});
+const verifyEmailOTP = asyncHandler(async (req, res) => {
+    const { success, error } = validateVerifyOtp(req.body);
+    if (!success) {
+        res.status(400).json({
+            success: false,
+            message: error.issues[0]?.message || "Invalid Otp",
+        });
+        return;
+    }
+    const { email, otp } = req.body;
+    if (!otpStore[email] || otpStore[email] !== Number(otp)) {
+        res
+            .status(400)
+            .json({ success: false, message: "Invalid or expired token" });
+        return;
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+        res.status(404).json({ success: false, message: "Email was not found" });
+        return;
+    }
+    user.isVerified = true;
+    await user.save();
+    const { password, ...others } = user.toObject();
+    res.status(200).json({
+        success: true,
+        data: { message: "Account verified successfully", ...others },
+    });
 });
 // Login User
 const login = asyncHandler(async (req, res) => {
@@ -41,24 +102,30 @@ const login = asyncHandler(async (req, res) => {
     }
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-        res.status(400).json({ message: "Invalid email or password" });
+        res
+            .status(400)
+            .json({ success: false, message: "Invalid email or password" });
         return;
     }
     const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
     if (!isPasswordMatch) {
-        res.status(400).json({ message: "Invalid email or password" });
+        res
+            .status(400)
+            .json({ success: false, message: "Invalid email or password" });
         return;
     }
     const token = user.generateToken();
     const { password, ...others } = user.toObject();
-    res.status(200).json({ ...others, token });
+    res.status(200).json({ success: true, data: { ...others, token } });
     return;
 });
 // Send Forgot Password Link
 const sendForgotPasswodLink = asyncHandler(async (req, res) => {
     const { error, success } = validateForgotPassword(req.body);
     if (!success) {
-        res.status(400).json({ message: error.issues[0]?.message });
+        res
+            .status(400)
+            .json({ success: false, message: error.issues[0]?.message });
         return;
     }
     const { email } = req.body;
@@ -72,34 +139,13 @@ const sendForgotPasswodLink = asyncHandler(async (req, res) => {
         expiresIn: "10m",
     });
     const link = `http://localhost:5000/auth/reset-password/${user.id}/${token}`;
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.USER_EMAIL,
-            pass: process.env.USER_PASS,
-        },
-    });
-    const mailOptions = {
-        from: process.env.USER_EMAIL,
-        to: user.email,
-        subject: "Reset Password Link",
-        html: `<div>
+    await sendEmail(user.email, "Reset Password Link", `<div>
         <h3>Click the link below to reset your password</h3>
         <p>${link}</p>
-      </div>
-    `,
-    };
-    transporter.sendMail(mailOptions, (error, success) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).json({ message: "Something went wrong" });
-        }
-        else {
-            console.log(`Email Sent: ${success.response}`);
-            return res.status(200).json({
-                message: "Password reset link sent successfully to your email",
-            });
-        }
+      </div>`);
+    res.status(200).json({
+        success: true,
+        data: { message: "Password reset link sent successfully to your email" },
     });
 });
 const resetPassword = asyncHandler(async (req, res) => {
@@ -122,7 +168,9 @@ const resetPassword = asyncHandler(async (req, res) => {
         req.body.password = await bcrypt.hash(req.body.password, salt);
         user.password = req.body.password;
         await user.save();
-        res.status(200).json({ message: "Password updated successfully" });
+        res
+            .status(200)
+            .json({ data: { message: "Password updated successfully" } });
     }
     catch (err) {
         console.error(err);
@@ -130,5 +178,5 @@ const resetPassword = asyncHandler(async (req, res) => {
         return;
     }
 });
-export { register, login, sendForgotPasswodLink, resetPassword };
+export { register, login, sendForgotPasswodLink, resetPassword, verifyEmailOTP, };
 //# sourceMappingURL=authController.js.map

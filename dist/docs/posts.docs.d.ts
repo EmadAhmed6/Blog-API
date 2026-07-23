@@ -29,9 +29,15 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Post'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Post'
  *       401:
  *         description: Not authorized
  */
@@ -85,7 +91,13 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Post'
  *       400:
  *         description: Invalid input
  *       401:
@@ -114,7 +126,13 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Post'
  *       401:
  *         description: Not authorized
  *       404:
@@ -169,6 +187,16 @@ export {};
  *     responses:
  *       200:
  *         description: Post updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Post'
  *       400:
  *         description: Invalid input
  *       401:
@@ -201,6 +229,9 @@ export {};
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
  *                   example: Post has been deleted successfully
@@ -233,7 +264,13 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Post'
  *       401:
  *         description: You are not logged in
  *       404:
@@ -268,14 +305,21 @@ export {};
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: Uploaded successfully
- *                 url:
- *                   type: string
- *                   format: uri
- *                 publicId:
- *                   type: string
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Uploaded successfully
+ *                     url:
+ *                       type: string
+ *                       format: uri
+ *                     publicId:
+ *                       type: string
+ *                       example: post_thumbnail_987
  *       400:
  *         description: No file provided
  *       401:

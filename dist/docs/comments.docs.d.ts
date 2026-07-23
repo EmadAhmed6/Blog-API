@@ -45,9 +45,15 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Comment'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Comment'
  *       400:
  *         description: Post ID is required
  *       401:
@@ -88,7 +94,13 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Comment'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
  *       400:
  *         description: Invalid input or Post ID is required
  *       401:
@@ -134,7 +146,13 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Comment'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
  *       400:
  *         description: Invalid input or Comment ID is required
  *       401:
@@ -174,6 +192,9 @@ export {};
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
  *                   example: Comment has been deleted successfully
@@ -215,7 +236,13 @@ export {};
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Comment'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Comment'
  *       401:
  *         description: You must be logged in to like this comment
  *       404:
@@ -265,18 +292,26 @@ export {};
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: Uploaded comment image successfully
- *                 image:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
  *                   type: object
  *                   properties:
- *                     url:
+ *                     message:
  *                       type: string
- *                       format: uri
- *                     publicId:
- *                       type: string
- *                       nullable: true
+ *                       example: Uploaded comment image successfully
+ *                     image:
+ *                       type: object
+ *                       properties:
+ *                         url:
+ *                           type: string
+ *                           format: uri
+ *                           example: https://res.cloudinary.com/example/image/upload/comment_attachment.jpg
+ *                         publicId:
+ *                           type: string
+ *                           nullable: true
+ *                           example: comment_image_789
  *       400:
  *         description: No file provided or Comment ID is required
  *       401:

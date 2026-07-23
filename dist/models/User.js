@@ -1,7 +1,6 @@
-import { z } from "zod";
 import jwt from "jsonwebtoken";
-import mongoose, { Document, Schema, model } from "mongoose";
-import { ForgotPasswordSchema, LoginSchema, passwordSchema, RegisterSchema, ResetPasswordSchema, } from "../schemas/auth.js";
+import { Document, Schema, model } from "mongoose";
+import { ForgotPasswordSchema, LoginSchema, OtpSchema, RegisterSchema, ResetPasswordSchema, } from "../schemas/auth.js";
 import { UpdateUserSchema } from "../schemas/user.js";
 const userSchema = new Schema({
     username: {
@@ -22,6 +21,10 @@ const userSchema = new Schema({
         required: true,
         minLength: 6,
     },
+    postsCount: {
+        type: Number,
+        default: 0,
+    },
     profilePicture: {
         type: {
             url: String,
@@ -32,6 +35,7 @@ const userSchema = new Schema({
             publicId: null,
         },
     },
+    isVerified: { type: Boolean, default: false },
     isAdmin: {
         type: Boolean,
         default: false,
@@ -57,9 +61,12 @@ const validateForgotPassword = (email) => {
 const validateResetPassword = (password) => {
     return ResetPasswordSchema.safeParse(password);
 };
+const validateVerifyOtp = (data) => {
+    return OtpSchema.safeParse(data);
+};
 const validateUpdateUser = (user) => {
     return UpdateUserSchema.safeParse(user);
 };
 const User = model("User", userSchema);
-export { User, validateRegisterUser, validateLoginUser, validateResetPassword, validateForgotPassword, validateUpdateUser, };
+export { User, validateRegisterUser, validateLoginUser, validateResetPassword, validateForgotPassword, validateVerifyOtp, validateUpdateUser, };
 //# sourceMappingURL=User.js.map

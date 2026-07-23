@@ -17,6 +17,7 @@ interface IUser extends Document, IUserSchema {
   isAdmin: boolean;
   generateToken: () => string;
   isVerified: boolean;
+  postsCount: number;
 }
 
 const userSchema = new Schema<IUser>(
@@ -39,6 +40,11 @@ const userSchema = new Schema<IUser>(
       required: true,
       minLength: 6,
     },
+    postsCount: {
+      type: Number,
+      default: 0,
+    },
+
     profilePicture: {
       type: {
         url: String,

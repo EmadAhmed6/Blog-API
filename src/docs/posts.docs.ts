@@ -292,6 +292,59 @@
 
 /**
  * @swagger
+ * /posts/{postId}/share:
+ *   post:
+ *     summary: Share a post
+ *     description: Create a new post referencing an existing original post
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         description: Original Post ID to share
+ *         schema:
+ *           type: string
+ *           example: 65f1a2b3c4d5e6f789012345
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description:
+ *                 type: string
+ *                 example: Check out this post!
+ *     responses:
+ *       201:
+ *         description: Post shared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Post shared successfully
+ *                     savedSharedPost:
+ *                       $ref: '#/components/schemas/Post'
+ *       401:
+ *         description: Not authorized
+ *       404:
+ *         description: Post was not found
+ */
+
+/**
+ * @swagger
  * /posts/upload:
  *   post:
  *     summary: Upload post image
@@ -385,6 +438,19 @@
  *                 type: string
  *               username:
  *                 type: string
+ *         sharedPost:
+ *           type: string
+ *           nullable: true
+ *           example: 65f1a2b3c4d5e6f789012344
+ *         sharesCount:
+ *           type: number
+ *           example: 5
+ *         likesCount:
+ *           type: number
+ *           example: 10
+ *         commentsCount:
+ *           type: number
+ *           example: 2
  *         comments:
  *           type: array
  *           items:

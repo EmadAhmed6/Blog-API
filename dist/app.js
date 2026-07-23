@@ -1,7 +1,7 @@
+import dotenv from "dotenv";
 import express from "express";
 import connectToDB from "./config/db.js";
 import { notFound, errorHandler } from "./middlewares/errors.js";
-import dotenv from "dotenv";
 import auth from "./routers/auth.js";
 import users from "./routers/users.js";
 import posts from "./routers/posts.js";

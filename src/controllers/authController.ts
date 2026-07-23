@@ -28,7 +28,7 @@ const sendEmail = async (to: string, subject: string, html: string) => {
   });
 };
 
-// Register User
+// REGISTER USER
 let otpStore: Record<string, number> = {};
 const register = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
@@ -82,6 +82,8 @@ const register = asyncHandler(
   },
 );
 
+// VERIFY OTP
+
 const verifyEmailOTP = asyncHandler(async (req: Request, res: Response) => {
   const { success, error } = validateVerifyOtp(req.body);
   if (!success) {
@@ -112,7 +114,7 @@ const verifyEmailOTP = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-// Login User
+// LOGIN USER
 const login = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateLoginUser(req.body);
@@ -146,7 +148,7 @@ const login = asyncHandler(
   },
 );
 
-// Send Forgot Password Link
+// SEND FORGOT PASSWORD 
 const sendForgotPasswodLink = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateForgotPassword(req.body);
@@ -182,6 +184,7 @@ const sendForgotPasswodLink = asyncHandler(
   },
 );
 
+// RESET PASSWORD
 const resetPassword = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateResetPassword(req.body);

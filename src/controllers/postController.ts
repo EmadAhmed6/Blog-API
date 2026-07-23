@@ -9,6 +9,7 @@ import path from "path";
 import fs from "fs";
 import cloudinary from "../utils/cloudinary.js";
 import { Types } from "mongoose";
+import { User } from "../models/User.js";
 
 // get All Posts
 const getAllPosts = asyncHandler(
@@ -16,7 +17,7 @@ const getAllPosts = asyncHandler(
     const pageNumber = Number(req.query.pageNumber) || 1;
     const postsPerPage = 2;
     const posts = await Post.find()
-      .populate("user", ["_id", "username"])
+      .populate("user", ["_id", "username", "profilePicture"])
       .populate("likes", ["_id", "username"])
       .populate({
         path: "comments",
@@ -42,7 +43,7 @@ const getAllPosts = asyncHandler(
 const getPostById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const posts = await Post.findById(req.params.postId)
-      .populate("user", ["_id", "username"])
+      .populate("user", ["_id", "username", "profilePicture"])
       .populate("likes", ["_id", "username"])
       .populate({
         path: "comments",
@@ -73,6 +74,15 @@ const createPost = asyncHandler(
       });
       return;
     }
+
+    if (!req.user) {
+      res.status(401).json({ success: false, message: "Not authorized" });
+      return;
+    }
+    await User.findByIdAndUpdate(req.user.id, {
+      $inc: { postsCount: 1 },
+    });
+
     const newPost = new Post({
       title: req.body.title,
       description: req.body.description,
@@ -80,6 +90,7 @@ const createPost = asyncHandler(
       image: req.body.image,
       user: req.user?.id,
     });
+
     const finalPost = await newPost.save();
     await finalPost.populate("user", ["_id", "username"]);
     res.status(201).json({ success: true, data: finalPost });
@@ -124,8 +135,15 @@ const updatePost = asyncHandler(
 const deletePost = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const post = await Post.findById(req.params.postId);
+    if (!req.user) {
+      res
+        .status(401)
+        .json({ success: false, data: { message: "Not authorized" } });
+      return;
+    }
     if (post) {
       await Post.findByIdAndDelete(req.params.postId);
+      await User.findByIdAndUpdate(req.user.id, { $inc: { postsCount: -1 } });
       res
         .status(200)
         .json({ success: true, message: "Post has been deleted successfully" });
@@ -188,6 +206,43 @@ const likePost = asyncHandler(
   },
 );
 
+const sharePost = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    res
+      .status(401)
+      .json({ success: false, data: { message: "Not authorized" } });
+    return;
+  }
+  const { postId } = req.params;
+  const { description } = req.body;
+  const originalPost = await Post.findById(postId);
+  if (!originalPost) {
+    res
+      .status(404)
+      .json({ success: false, data: { message: "Post was not found" } });
+    return;
+  }
+  const sharedPostRecord = new Post({
+    title: originalPost?.title,
+    description: description || "",
+    category: originalPost?.category,
+    image: originalPost?.image,
+    user: req.user.id,
+    sharedPost: originalPost?._id,
+  });
+
+  const savedSharedPost = await sharedPostRecord.save();
+  await Post.findByIdAndUpdate(postId, {
+    $inc: { sharesCount: 1 },
+  });
+  await Post.findByIdAndUpdate(req.user.id, {
+    $inc: { postsCount: 1 },
+  });
+  res.status(201).json({
+    success: true,
+    data: { message: "Post shared successfully", savedSharedPost },
+  });
+});
 export {
   getAllPosts,
   getPostById,
@@ -196,4 +251,5 @@ export {
   deletePost,
   uploadPostImage,
   likePost,
+  sharePost,
 };

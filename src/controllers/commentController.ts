@@ -8,8 +8,9 @@ import {
 } from "../models/Comment.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Types } from "mongoose";
+import { Post } from "../models/Post.js";
 
-// get All Comments
+// GET ALL COMMENTS
 const getAllComments = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const pageNumber = Number(req.query.pageNumber) || 1;
@@ -32,7 +33,7 @@ const getAllComments = asyncHandler(
   },
 );
 
-// Create Comment
+// CREATE COMMENT
 const createComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const postId = req.params.postId;
@@ -66,12 +67,14 @@ const createComment = asyncHandler(
       ["_id", "username"],
     );
 
+    await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
+
     res.status(201).json({ success: true, data: finalComment });
     return;
   },
 );
 
-// Update Comment
+// UPDATE COMMENT
 const updateComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { error, success } = validateUpdateComment(req.body);
@@ -105,7 +108,7 @@ const updateComment = asyncHandler(
   },
 );
 
-// Delete Comment
+// DELETE COMMENT
 const deleteComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const commentId = req.params.commentId;
@@ -131,7 +134,7 @@ const deleteComment = asyncHandler(
   },
 );
 
-// Like Comment
+// LIKE COMMENT
 const likeComment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const commentId = req.params.commentId;
@@ -172,7 +175,7 @@ const likeComment = asyncHandler(
   },
 );
 
-// Upload Comment Image
+// UPLOAD COMMENT IMAGE
 const uploadCommentImage = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const commentId = req.params.commentId;

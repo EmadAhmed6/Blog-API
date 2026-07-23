@@ -1,6 +1,4 @@
 import { Post } from "./models/Post.js";
-import { User } from "./models/User.js";
-import bcrypt from "bcryptjs";
 import posts from './data.js';
 import connectToDB from "./config/db.js";
 import dotenv from "dotenv";
@@ -8,23 +6,7 @@ dotenv.config();
 const importPosts = async () => {
     try {
         await connectToDB();
-        let user = await User.findOne();
-        if (!user) {
-            const genSalt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash("password123", genSalt);
-            user = new User({
-                username: "defaultUser",
-                email: "default@example.com",
-                password: hashedPassword,
-            });
-            await user.save();
-            console.log('Default user created for seeding');
-        }
-        const postsWithUser = posts.map(post => ({
-            ...post,
-            user: user._id
-        }));
-        await Post.insertMany(postsWithUser);
+        await Post.insertMany(posts);
         console.log('Posts imported successfully');
         process.exit();
     }

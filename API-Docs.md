@@ -51,13 +51,14 @@ Protected routes require JSON Web Token (JWT) authentication. To authenticate, i
 | 14 | PUT | `/posts/:postId` | Update title, description, category, or image of a post | 🔒 |
 | 15 | DELETE | `/posts/:postId` | Delete a post and clear its associated media | 🔒 |
 | 16 | PUT | `/posts/:postId/like` | Toggle like/unlike status on a blog post | 🔒 |
-| 17 | POST | `/posts/upload` | Upload thumbnail/cover image to Cloudinary | 🔒 |
-| 18 | GET | `/posts/:postId/comments` | Retrieve list of comments for a specific post | 🔒 |
-| 19 | POST | `/posts/:postId/comments` | Post a new comment under a specific post | 🔒 |
-| 20 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 |
-| 21 | DELETE | `/posts/:postId/comments/:commentId` | Remove a comment from a post | 🔒 |
-| 22 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike status on a comment | 🔒 |
-| 23 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 |
+| 17 | POST | `/posts/:postId/share` | Share an existing blog post | 🔒 |
+| 18 | POST | `/posts/upload` | Upload thumbnail/cover image to Cloudinary | 🔒 |
+| 19 | GET | `/posts/:postId/comments` | Retrieve list of comments for a specific post | 🔒 |
+| 20 | POST | `/posts/:postId/comments` | Post a new comment under a specific post | 🔒 |
+| 21 | PUT | `/posts/:postId/comments/:commentId` | Update text content of a comment | 🔒 |
+| 22 | DELETE | `/posts/:postId/comments/:commentId` | Remove a comment from a post | 🔒 |
+| 23 | PUT | `/posts/:postId/comments/:commentId/like` | Toggle like/unlike status on a comment | 🔒 |
+| 24 | POST | `/posts/:postId/comments/:commentId/upload` | Upload comment image to Cloudinary | 🔒 |
 
 ---
 
@@ -891,6 +892,68 @@ Missing or invalid authentication token.
 
 ##### Response 404
 Post was not found.
+```json
+{
+  "message": "Post was not found"
+}
+```
+
+---
+
+### POST /posts/:postId/share 🔒
+Share an existing blog post. Creates a new post record referencing the original post.
+
+#### Path Parameters
+| Parameter | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `postId` | string | ✅ | ID of the original post to share. |
+
+#### Request Body
+| Field | Type | Required | Description |
+| :--- | :--- | :---: | :--- |
+| `description` | string | ❌ | Optional comment or text addition for the shared post. |
+
+#### Responses
+
+##### Response 201
+Post shared successfully.
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Post shared successfully",
+    "savedSharedPost": {
+      "_id": "65f1a2b3c4d5e6f789012349",
+      "title": "My First Blog Post",
+      "description": "Check this out!",
+      "category": "Technology",
+      "user": "65f1a2b3c4d5e6f789012347",
+      "image": {
+        "url": "https://example.com/image.jpg",
+        "publicId": "blog_image_123"
+      },
+      "likes": [],
+      "sharedPost": "65f1a2b3c4d5e6f789012345",
+      "sharesCount": 0,
+      "likesCount": 0,
+      "commentsCount": 0,
+      "createdAt": "2026-07-23T08:30:00.000Z",
+      "updatedAt": "2026-07-23T08:30:00.000Z"
+    }
+  }
+}
+```
+
+##### Response 401
+Missing or invalid authentication token.
+```json
+{
+  "message": "Not authorized"
+}
+```
+
+##### Response 404
+Original post was not found.
 ```json
 {
   "message": "Post was not found"

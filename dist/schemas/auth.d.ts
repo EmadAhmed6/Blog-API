@@ -12,13 +12,18 @@ declare const LoginSchema: z.ZodObject<{
 declare const ForgotPasswordSchema: z.ZodObject<{
     email: z.ZodString;
 }, z.core.$strip>;
+declare const OtpSchema: z.ZodObject<{
+    email: z.ZodString;
+    otp: z.ZodString;
+}, z.core.$strip>;
 declare const ResetPasswordSchema: z.ZodObject<{
     password: z.ZodString;
     confirmPassword: z.ZodString;
 }, z.core.$strip>;
-export { RegisterSchema, LoginSchema, ForgotPasswordSchema, ResetPasswordSchema, passwordSchema, };
+export { RegisterSchema, LoginSchema, ForgotPasswordSchema, ResetPasswordSchema, passwordSchema, OtpSchema, };
 export type IRegisterUser = z.infer<typeof RegisterSchema>;
 export type ILoginUser = z.infer<typeof LoginSchema>;
+export type IOtp = z.infer<typeof OtpSchema>;
 export type IForgotPassword = z.infer<typeof ForgotPasswordSchema>;
 export type IResetPassword = z.infer<typeof ResetPasswordSchema>;
 //# sourceMappingURL=auth.d.ts.map

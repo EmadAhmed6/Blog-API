@@ -8,6 +8,7 @@ import {
   createPost,
   likePost,
   uploadPostImage,
+  sharePost,
 } from "../controllers/postController.js";
 import {
   verifyToken,
@@ -20,6 +21,9 @@ const router = express.Router();
 
 // Crud
 router.route("/").get(verifyToken, getAllPosts).post(verifyToken, createPost);
+
+router.post("/:postId/share", verifyToken, sharePost);
+
 router
   .route("/:postId")
   .get(verifyToken, getPostById)

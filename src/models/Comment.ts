@@ -1,6 +1,10 @@
 import express from "express";
 import mongoose, { Document, model, Schema, Types } from "mongoose";
-import { CreateCommentSchema, UpdateCommentSchema, type IUpdateComment } from "../schemas/comment.js";
+import {
+  CreateCommentSchema,
+  UpdateCommentSchema,
+  type IUpdateComment,
+} from "../schemas/comment.js";
 
 interface ICreateComment {
   postId: string;
@@ -15,6 +19,7 @@ interface IComment extends Omit<ICreateComment, "postId">, Document {
   postId: Types.ObjectId;
   user: Types.ObjectId;
   likes: Types.ObjectId[];
+  commentsCount: Number;
 }
 const CommentSchema = new Schema<IComment>(
   {

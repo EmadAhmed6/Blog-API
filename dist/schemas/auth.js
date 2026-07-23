@@ -16,6 +16,10 @@ const LoginSchema = z.object({
 const ForgotPasswordSchema = z.object({
     email: z.string().email(),
 });
+const OtpSchema = z.object({
+    email: z.string().email({ message: "Invalid email address" }),
+    otp: z.string().min(5, { message: "Otp Must be at least 6 digits" }),
+});
 const ResetPasswordSchema = z
     .object({
     password: passwordSchema,
@@ -25,5 +29,5 @@ const ResetPasswordSchema = z
     message: "Password does not match",
     path: ["confirmPassword"],
 });
-export { RegisterSchema, LoginSchema, ForgotPasswordSchema, ResetPasswordSchema, passwordSchema, };
+export { RegisterSchema, LoginSchema, ForgotPasswordSchema, ResetPasswordSchema, passwordSchema, OtpSchema, };
 //# sourceMappingURL=auth.js.map
