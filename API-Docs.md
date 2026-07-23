@@ -98,6 +98,8 @@ User registered successfully. Returns user details along with an auto-generated 
     "username": "ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isVerified": false,
+    "postsCount": 0,
     "profilePicture": {
       "url": "",
       "publicId": null
@@ -139,6 +141,8 @@ Login successful. Returns user account details and the authorization token.
     "username": "ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isVerified": true,
+    "postsCount": 0,
     "profilePicture": {
       "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
       "publicId": "profile_picture_123"
@@ -182,6 +186,8 @@ Account verified successfully. Returns user account details.
     "username": "ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isVerified": true,
+    "postsCount": 0,
     "profilePicture": {
       "url": "",
       "publicId": null
@@ -306,6 +312,8 @@ Successfully retrieved users list.
       "username": "Ahmed",
       "email": "ahmed@example.com",
       "isAdmin": false,
+      "isVerified": true,
+      "postsCount": 0,
       "profilePicture": {
         "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
         "publicId": "profile_picture_123"
@@ -347,6 +355,8 @@ Successfully retrieved user details.
     "username": "Ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isVerified": true,
+    "postsCount": 0,
     "profilePicture": {
       "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
       "publicId": "profile_picture_123"
@@ -402,6 +412,8 @@ Profile updated successfully. Returns updated user document.
     "username": "AhmedUpdated",
     "email": "ahmed.new@example.com",
     "isAdmin": false,
+    "isVerified": true,
+    "postsCount": 0,
     "profilePicture": {
       "url": "https://res.cloudinary.com/example/image/upload/profile.jpg",
       "publicId": "profile_picture_123"
@@ -471,6 +483,8 @@ Image uploaded and user profile picture updated successfully.
     "username": "Ahmed",
     "email": "ahmed@example.com",
     "isAdmin": false,
+    "isVerified": true,
+    "postsCount": 0,
     "profilePicture": {
       "url": "https://res.cloudinary.com/example/image/upload/new_profile.jpg",
       "publicId": "profile_picture_567"
