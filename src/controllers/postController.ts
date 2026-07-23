@@ -242,6 +242,7 @@ const sharePost = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     data: { message: "Post shared successfully", savedSharedPost },
   });
+  return;
 });
 export {
   getAllPosts,

@@ -11,6 +11,7 @@ import {
   validateForgotPassword,
   validateVerifyOtp,
 } from "../models/User.js";
+import type { IRegisterUser } from "../schemas/auth.js";
 
 const sendEmail = async (to: string, subject: string, html: string) => {
   const transporter = nodemailer.createTransport({
@@ -79,12 +80,12 @@ const register = asyncHandler(
         ...others,
       },
     });
+    return;
   },
 );
 
 // VERIFY OTP
-
-const verifyEmailOTP = asyncHandler(async (req: Request, res: Response) => {
+const verifyEmailOTP = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { success, error } = validateVerifyOtp(req.body);
   if (!success) {
     res.status(400).json({
@@ -112,6 +113,7 @@ const verifyEmailOTP = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     data: { message: "Account verified successfully", ...others },
   });
+  return;
 });
 
 // LOGIN USER
@@ -181,6 +183,7 @@ const sendForgotPasswodLink = asyncHandler(
       success: true,
       data: { message: "Password reset link sent successfully to your email" },
     });
+    return;
   },
 );
 
@@ -211,6 +214,7 @@ const resetPassword = asyncHandler(
       res
         .status(200)
         .json({ data: { message: "Password updated successfully" } });
+      return;
     } catch (err) {
       console.error(err);
       res.status(400).json({ message: "Something went wrong" });

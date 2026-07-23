@@ -126,10 +126,12 @@ const deleteComment = asyncHandler(
         success: true,
         message: "Comment has been deleted successfully",
       });
+      return;
     } else {
       res
         .status(404)
         .json({ success: false, message: "Comment was not found" });
+      return
     }
   },
 );
