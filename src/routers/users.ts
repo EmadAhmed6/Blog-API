@@ -22,7 +22,6 @@ router.post(
 );
 
 router.route("/").get(verifyToken, getAllUsers);
-
 router
   .route("/:id")
   .get(verifyToken, getUserById)

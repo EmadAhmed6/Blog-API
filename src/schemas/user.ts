@@ -1,19 +1,21 @@
 import { z } from "zod";
 import { passwordSchema } from "./auth.js";
-const UpdateUserSchema = z
-  .object({
-    username: z.string().trim().min(3).max(10),
-    email: z.string().email().trim().min(4),
-    password: passwordSchema,
-    image: z
-      .object({
-        url: z.string().url(),
-        publicId: z.string().nullable(),
-      })
-      .optional(),
-  })
-  .partial();
 
-export { UpdateUserSchema };
+const UserSchema = z.object({
+  username: z.string().trim().min(3).max(10),
+  email: z.string().email().trim().min(4),
+  password: passwordSchema,
+  profilePicture: z
+    .object({
+      url: z.string().url(),
+      publicId: z.string().nullable(),
+    })
+    .optional(),
+});
 
+const UpdateUserSchema = UserSchema.partial();
+
+export { UserSchema, UpdateUserSchema };
+
+export type IUserSchema = z.infer<typeof UserSchema>;
 export type IUpdateUser = z.infer<typeof UpdateUserSchema>;

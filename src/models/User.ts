@@ -1,30 +1,24 @@
-import { z } from "zod";
 import jwt from "jsonwebtoken";
-import mongoose, { Document, Schema, model } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 import {
   ForgotPasswordSchema,
   LoginSchema,
-  passwordSchema,
   RegisterSchema,
   ResetPasswordSchema,
   type ILoginUser,
   type IRegisterUser,
   type IResetPassword,
 } from "../schemas/auth.js";
-import { UpdateUserSchema } from "../schemas/user.js";
+import { UpdateUserSchema, type IUserSchema } from "../schemas/user.js";
 interface UserBase {
   username: string;
   email: string;
 }
 
-interface IUser extends Document, UserBase {
-  password: string;
+interface IUser extends Document, IUserSchema {
   isAdmin: boolean;
-  profilePicture: {
-    url: string;
-    publicId: string | null;
-  };
   generateToken: () => string;
+  isVerified: boolean;
 }
 
 const userSchema = new Schema<IUser>(
@@ -57,6 +51,7 @@ const userSchema = new Schema<IUser>(
         publicId: null,
       },
     },
+    isVerified: { type: Boolean, default: false },
     isAdmin: {
       type: Boolean,
       default: false,
@@ -90,7 +85,9 @@ const validateResetPassword = (password: IResetPassword) => {
   return ResetPasswordSchema.safeParse(password);
 };
 const validateUpdateUser = (
-  user: Partial<IUser> & { image: { url: string; publicId: string | null } },
+  user: Partial<IUser> & {
+    profilePicture: { url: string; publicId: string | null };
+  },
 ) => {
   return UpdateUserSchema.safeParse(user);
 };
