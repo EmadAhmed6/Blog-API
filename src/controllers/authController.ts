@@ -9,6 +9,7 @@ import {
   validateLoginUser,
   validateResetPassword,
   validateForgotPassword,
+  validateVerifyOtp,
 } from "../models/User.js";
 
 const sendEmail = async (to: string, subject: string, html: string) => {
@@ -82,6 +83,14 @@ const register = asyncHandler(
 );
 
 const verifyEmailOTP = asyncHandler(async (req: Request, res: Response) => {
+  const { success, error } = validateVerifyOtp(req.body);
+  if (!success) {
+    res.status(400).json({
+      success: false,
+      message: error.issues[0]?.message || "Invalid Otp",
+    });
+    return;
+  }
   const { email, otp } = req.body;
   if (!otpStore[email] || otpStore[email] !== Number(otp)) {
     res

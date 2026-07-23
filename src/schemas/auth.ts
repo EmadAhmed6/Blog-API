@@ -21,6 +21,10 @@ const LoginSchema = z.object({
 const ForgotPasswordSchema = z.object({
   email: z.string().email(),
 });
+const OtpSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  otp: z.string().min(5, { message: "Otp Must be at least 6 digits" }),
+});
 const ResetPasswordSchema = z
   .object({
     password: passwordSchema,
@@ -37,9 +41,11 @@ export {
   ForgotPasswordSchema,
   ResetPasswordSchema,
   passwordSchema,
+  OtpSchema,
 };
 
 export type IRegisterUser = z.infer<typeof RegisterSchema>;
 export type ILoginUser = z.infer<typeof LoginSchema>;
+export type IOtp = z.infer<typeof OtpSchema>;
 export type IForgotPassword = z.infer<typeof ForgotPasswordSchema>;
 export type IResetPassword = z.infer<typeof ResetPasswordSchema>;

@@ -3,17 +3,15 @@ import { Document, Schema, model } from "mongoose";
 import {
   ForgotPasswordSchema,
   LoginSchema,
+  OtpSchema,
   RegisterSchema,
   ResetPasswordSchema,
   type ILoginUser,
+  type IOtp,
   type IRegisterUser,
   type IResetPassword,
 } from "../schemas/auth.js";
 import { UpdateUserSchema, type IUserSchema } from "../schemas/user.js";
-interface UserBase {
-  username: string;
-  email: string;
-}
 
 interface IUser extends Document, IUserSchema {
   isAdmin: boolean;
@@ -84,6 +82,10 @@ const validateForgotPassword = (email: string) => {
 const validateResetPassword = (password: IResetPassword) => {
   return ResetPasswordSchema.safeParse(password);
 };
+
+const validateVerifyOtp = (data: IOtp) => {
+  return OtpSchema.safeParse(data);
+};
 const validateUpdateUser = (
   user: Partial<IUser> & {
     profilePicture: { url: string; publicId: string | null };
@@ -100,5 +102,6 @@ export {
   validateLoginUser,
   validateResetPassword,
   validateForgotPassword,
+  validateVerifyOtp,
   validateUpdateUser,
 };
